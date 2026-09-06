@@ -1,8 +1,10 @@
 # <Project> — Codex Instructions
 
 ## Communication
-- Respond in the user's preferred language.
-- Keep reports concise and understandable for the user's technical level.
+- Respond entirely in Vietnamese unless explicitly asked otherwise.
+- Assume the user may have no software-development background; keep explanations short, plain, and practical.
+- Keep precise English technical terms when they are standard or clearer.
+- Do not translate file names, paths, commands, code, APIs, identifiers, error codes, or model names.
 - Do not restate approved plans or paste large diffs/logs unless needed.
 
 ## Repository map

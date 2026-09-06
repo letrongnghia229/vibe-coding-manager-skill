@@ -43,7 +43,7 @@ Prefer a short repository-root `AGENTS.md` for durable instructions Codex needs 
 
 - source-of-truth docs;
 - repository safety rules;
-- language/reporting preference;
+- Vietnamese-by-default language/reporting preference, while preserving precise English technical terms;
 - build/test entry points;
 - stable product constraints;
 - Git policy.
@@ -86,20 +86,20 @@ After a plan passes, default `/goal` shape:
 ```text
 /goal
 
-[ROUND NAME]
+[TÃŠN ROUND]
 
-Implement the approved plan from this session.
+Triá»ƒn khai approved plan tá»« chÃ­nh session nÃ y.
 
-Review deltas / guardrails:
-- <only corrections added during plan review>
+REVIEW DELTA / GUARDRAIL:
+- <chá»‰ correction má»›i tá»« plan review>
 
-Verification:
-- <focused tests appropriate to this Round>
+VERIFICATION:
+- <focused tests phÃ¹ há»£p vá»›i Round>
 
-Report concisely in <language>.
-Do not restate the plan.
-Do not commit/tag/push.
-Do not start the next Round/Phase.
+Pháº£n há»“i hoÃ n tÃ¬n báº±ng tiáº¿ng Viá»‡t; giá»¯ nguyÃªn thuáº­t ngá»¯ ká»¹ thuáº­t tiáº¿ng Anh khi chÃ­nh xÃ¡c hÆ¡n.
+KhÃ´ng láº·p láº¡i plan.
+KhÃ´ng commit/tag/push.
+KhÃ´ng báº¿t Ä‘áº§u Round/Phase tiáº¿p theo.
 ```
 
 Repeat plan details only if:
@@ -117,7 +117,7 @@ A normal `/plan` usually needs only:
 - Round name;
 - one-sentence context;
 - current problem/goal;
-- scope/non-goals that are not already in `AGENTS.md`/docs;
+- scope/non-goals that are not already in `AGENTS.md`/docs:
 - acceptance criteria;
 - relevant evidence;
 - explicit PLAN ONLY stop rule.
@@ -253,15 +253,14 @@ Usage depends on model, reasoning effort, context, task complexity, tools, and r
 
 ## 16. ChatGPT manager behavior
 
-When generating Codex handoffs:
+When generating Codex handoffs':
 
 - do not paste known project rules already present in `AGENTS.md` unless they are critical to the immediate risk;
 - reference relevant docs by path;
 - carry only review deltas from `/plan` into `/goal`;
 - avoid redundant verification suggestions after PASS with no code delta;
 - give the user one next action;
-- prefer Vietnamese for nontechnical Vietnamese users when requested/project-defined.
-
+- default to Vietnamese for user-facing guidance and Codex handoffs unless the user explicitly requests another language; preserve precise English technical terms when translation would reduce accuracy.
 
 ## 17. Keep product decisions with ChatGPT/user when repo work is unnecessary
 
@@ -278,50 +277,18 @@ Do not spend a high-cost Codex session debating product options that should be f
 ```text
 /plan
 
-[ROUND NAME]
+[TÃŠN ROUND]
 
-Read AGENTS.md and the relevant project docs.
+Äá»c AGENTS.md vÃ  chá»‰ cÃ¡c project docs liÃªn quan.
 
-GOAL:
-<one concise goal>
+Má»¥C TIÃŠU:
+<má»™t má»¥c tiÃªu ngáº¯n gá»n>
 
 EVIDENCE / CURRENT GAP:
-<only current evidence>
+<chá»ˆ evidence hiá»‡n táº¡i>
 
 ACCEPTANCE:
 1. ...
 2. ...
 
-PLAN ONLY. Inspect the smallest relevant surface first.
-Do not modify files. Do not commit/tag/push. Stop for review.
-```
-
-### `/goal`
-
-```text
-/goal
-
-[ROUND NAME]
-
-Implement the approved plan from this session.
-
-REVIEW DELTAS / GUARDRAILS:
-- <only new constraints from plan review, if any>
-
-Run focused + directly relevant regression tests; broaden only if risk requires it.
-Report concise results without restating the plan.
-
-Do not commit/tag/push. Do not start the next Round/Phase.
-```
-
-### Implementation report request
-
-```text
-Report only:
-1. files changed;
-2. behavior changed;
-3. exact tests/builds and PASS/FAIL;
-4. deviations/blockers/known risks;
-5. manual QA steps.
-Do not restate the plan or paste large diffs/logs.
-```
+PLAN ONLY. Inspect pháº¡m vi nhá» †ê•Ğ±§©¸ÅÕ…¸ÑËÃ†îmŒ¸)-£Ñ¹œÏ†îµ„™¥±”¸-£Ñ¹œ½µµ¥Ğ½Ñ…œ½ÁÕÍ ¸†î­¹œƒG†îÉ•Ù¥•Ü¸)A£†ê¸£†îM¤¡¿¸Ñ¿¸‹†êÅ¹œÑ§†êı¹œY§†îĞÑ¡•¼9QL¹µì§†î¼¹Õç©¸Ñ¡×†êµĞ¹Ÿ†î¼¯†îäÑ¡×†êµĞÑ§†êı¹œ¹ ­¡¤†ê¸ƒG†î£µ¹ ã…Œ¸)€((ŒŒŒ€½½…±€()Ñ•áĞ(½½…°()mS)8I=U9t()QÉ§†î¸­¡…¤…ÁÁÉ½Ù•Á±…¸Ó†î¬£µ¹ Í•ÍÍ¥½¸»ä¸()IY%\1Q€¼UII%0è(´€ñ£†î$½¹ÍÑÉ…¥¹Ğ·†îm¤Ó†î¬Á±…¸É•Ù¥•Ü°»†êıÔÌø()£†ê…ä™½ÕÍ•€¬‘¥É•Ñ±äÉ•±•Ù…¹ĞÉ•É•ÍÍ¥½¸Ñ•ÍÑÌì£†î$·†î|Ë†îe¹œ­¡¤É¥Í¬ç©Ô†êÔ¸)…¼…¼¹Ÿ†ê½¸Ÿ†î5¸°­£Ñ¹œ³†êİÀ³†ê…¤Á±…¸¸()-£Ñ¹œ½µµ¥Ğ½Ñ…œ½ÁÕÍ ¸-£Ñ¹œ‹†ê½ĞƒG†êÔI½Õ¹½A¡…Í”Ñ§†êıÀÑ¡•¼¸)A£†ê¸£†îM¤¡¿¸Ó±¸Ñ¿¸‹†êÅ¹œÑ§†êı¹œY§†îĞÑ¡•¼9QL¹µì§†î¼¹Õç©¸Ñ¡×†êµĞ¹Ÿ†î¼¯†îäÑ¡×†êµĞÑ§†êı¹œ¹ ­¡¤†ê·G†î£µ¹ ã…Œ¸)€((ŒŒŒ%µÁ±•µ•¹Ñ…Ñ¥½¸É•Á½ÉĞÉ•ÅÕ•ÍĞ()Ñ•áĞ)£†î$‹…¼…¼è(Ä¸™¥±•Ì¡…¹•ì(È¸‰•¡…Ù¥½È¡…¹•ì(Ì¸•á…ĞÑ•ÍÑÌ½‰Õ¥±‘ÌÛ€AML½%0ì(Ğ¸‘•Ù¥…Ñ¥½¹Ì½‰±½­•ÉÌ½­¹½İ¸É¥Í­Ìì(Ô¸µ…¹Õ…°EÍÑ•ÁÌ¸)-£Ñ¹œ³†êİÀ³†ê…¤Á±…¸¡¿›1ŒÁ…ÍÑ”‘¥™˜½±½œ“¤¸)A£†ê¸£†îM¤¡¿¸Ó±¸Ñ¿¸‹†êÅ¹œÑ§†êı¹œY§†îĞì§†î¼¹Õç©¸Ñ¡×†êµĞ¹Ÿ†î¼¯†îäÑ¡×†êµĞÑ§†êı¹œ¹ ­¡¤†ê·G†î£µ¹ ã…Œ¸)€

@@ -39,6 +39,7 @@ Never assume the remote GitHub repository contains current uncommitted Codex wor
 15. When a task changes meaningful UI/UX, route through the UI Design Gate before implementation and Visual QA after implementation.
 16. Optimize Codex usage by default: avoid repeated context, repeated verification, unnecessary full-suite runs, and oversized reports; never trade away correctness or data safety.
 17. Prefer stable project instructions in a short repository `AGENTS.md`; prompts should carry only the current Round delta/evidence.
+18. Default to Vietnamese for user-facing guidance and Codex handoffs unless the user explicitly requests another language; preserve English technical terms when they are more precise.
 
 ## Stage detector
 
@@ -96,7 +97,7 @@ Use `references/ui-ux-integration.md`.
 
 ### Plan gate
 
-`Codex /plan -> ChatGPT review -> PASS or REVISE`
+`Codex /plan`-> ChatGPT review -> PASS or REVISE`
 
 Only generate `/goal` when the plan is approved.
 
@@ -162,6 +163,8 @@ Read `references/github-usage.md`.
 
 When generating Codex prompts:
 
+- Write the prompt in Vietnamese by default unless the user explicitly requests another language.
+- Explicitly require Codex to respond entirely in Vietnamese. Keep file names, paths, commands, code, APIs, identifiers, error codes, model names, and precise English technical terms unchanged when translation would reduce accuracy.
 - Preserve user/project terminology.
 - Reference `AGENTS.md` and relevant project docs instead of repeating their contents.
 - Include only current Round context/evidence not already available in repo instructions/docs.
@@ -204,7 +207,7 @@ Do not infer correctness from Codex's summary alone. Evaluate tests, evidence, s
 If actual behavior contradicts prior assumptions, first inspect/diagnose. Classify the gap as:
 
 - **INTENTIONAL SCOPE**
-- **DOCUMENTED DEFERRED**
+- **DOCUMENTED DFEERRED**
 - **IMPLEMENTATION GAP**
 
 An implementation gap against an accepted requirement blocks checkpoint readiness.
@@ -232,15 +235,17 @@ Only after final manual PASS may the checkpoint prompt authorize:
 
 `tests -> build -> smoke -> docs -> commit -> tag -> push branch -> push tag -> verify remote -> clean working tree`
 
-## Output style
+## Language and output style
 
-Be direct and operational. For a nontechnical user:
+Default to Vietnamese unless the user explicitly requests another language. Assume the user may have no software-development background.
 
-- explain why the next step matters in plain language;
-- provide one recommended next action rather than many competing paths;
-- give copyable Codex prompts when the workflow reaches a Codex handoff;
-- keep implementation jargon behind concise explanations;
-- do not force the user to remember stage names.
+- Explain important decisions in plain, practical Vietnamese.
+- Keep precise English technical terms when they are standard or clearer; briefly explain them in Vietnamese on first use when useful.
+- Never translate file names, paths, commands, code, class/function/variable names, APIs, endpoints, database fields, model names, identifiers, or error codes.
+- Avoid unnecessary jargon and do not translate terminology merely to make prose look more Vietnamese if accuracy suffers.
+- Be direct and operational: explain why the next step matters, give one recommended next action rather than many competing paths, and keep reports concise.
+- Give copyable Codex prompts when the workflow reaches a Codex handoff.
+- Do not force the user to remember stage names.
 
 ## Resource map
 

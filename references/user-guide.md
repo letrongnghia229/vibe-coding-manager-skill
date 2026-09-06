@@ -40,7 +40,7 @@
 - Final Verification / Delta Verification;
 - checkpoint Git.
 
-Skill này không thay Codex. ChatGPT dùng skill để điều phối; Codex thực thi code.
+Skill này không thay Codex. ChatGPT dùng skill để điều phồi; Codex thực thi code.
 
 ## 2. Cài `vibe-coding-manager` ở đâu?
 
@@ -158,7 +158,7 @@ docs/
 └─ CHECKPOINTS...
 ```
 
-`AGENTS.md` phải ngắn: nó là bản đồ/routing cho Codex, không phải bản sao PRD. Nếu project có design system đã duyệt thì có thể thêm `design-system/`. Không restructure repo chỉ để trông “chuẩn”.
+`AGENTS.md` phải ngắn: nó làm bản đồ/routing cho Codex, không phải bản sao PRD. Nếu project có design system đã duyệt thì có thể thêm `design-system/`. Không restructure repo chỉ để trông “chuaẩn”.
 
 ## 7. Cách nói chuyện với skill hằng ngày
 
@@ -172,11 +172,11 @@ Brainstorm theo workflow vibe coding của tôi.
 Chưa code.
 ```
 
-### Phản biện
+### Phản biên
 
 ```text
 Đây là proposal đã có.
-Phản biện trước khi chốt.
+Phản biên trước khi chốt.
 ```
 
 ### Chia Round
@@ -371,6 +371,9 @@ All Rounds PASS
 10. Stable > Clever.
 11. Không refactor stable code chỉ vì đẹp kiến trúc.
 12. Không bắt đầu Phase tiếp theo trước stable checkpoint.
+13. Mặc định ChatGPT và prompt Codex dùng tiếng Việt; Codex phải phản hồi hoàn toàn bằng tiếng Việt trừ khi user yêu cầu khác.
+14. Giữ nguyên tên file/path/command/code/API/identifier/error code/model name và thuật ngữ tiếng Anh khi dịch sẽ làm giảm độ chính xác.
+15. Giải thích ngắn gọn, dễ hiểu cho người không có nền tảng phát triển phần mềm.
 
 ## 14. Tiết kiệm Codex usage
 
