@@ -1,338 +1,431 @@
-# Vibe Coding Manager — Hướng dẫn cho người không chuyên
+# Vibe Coding Manager — Hướng dẫn cài đặt và sử dụng
 
 ## Mục lục
 
-1. Skill này dùng để làm gì
-2. Bốn vai trò cần hiểu
-3. Workflow hằng ngày
-4. `/plan` và `/goal`
-5. Prompt mẫu
-6. Ngôn ngữ và cách giải thích
-7. Chống overengineering
-8. Git và checkpoint
-9. Đồng bộ skill ở 3 nơi
-10. Khi update chính skill
-11. Setup ChatGPT Project
-12. UI workflow
-13. Chọn model Codex
-14. Cuối Phase
-15. FAQ
+1. Skill dùng để làm gì
+2. Cài vibe-coding-manager
+3. Có cần cài lên Codex không
+4. Kết hợp ui-ux-pro-max
+5. Cài ui-ux-pro-max cho Codex
+6. Setup project
+7. Cách sử dụng hằng ngày
+8. UI workflow
+9. Khi nào dùng ui-ux-pro-max
+10. Model selection
+11. GitHub trong workflow
+12. Final Phase flow
+13. Quy tắc cần nhớ
+14. Tiết kiệm Codex usage
+15. Cấu trúc repository
+16. Quick-start
+
 
 ## 1. Skill này dùng để làm gì?
 
-`vibe-coding-manager` giúp người không chuyên phát triển phần mềm bằng ChatGPT + Codex mà không cần tự viết code hay tự chọn kiến trúc kỹ thuật chi tiết.
+`vibe-coding-manager` giúp quản lý toàn bộ workflow phát triển phần mềm bằng ChatGPT Web + Codex:
 
-Luồng cơ bản:
+- brainstorm ý tưởng;
+- phản biện proposal;
+- chốt spec;
+- chia Phase / Round;
+- chọn model cho Codex;
+- tạo `/plan`;
+- review `/plan`;
+- tạo `/goal`;
+- review implementation;
+- hướng dẫn manual QA;
+- UI Design Gate + Visual QA;
+- diagnose / Fix Round;
+- Final Regression Review;
+- Final Verification / Delta Verification;
+- checkpoint Git.
+
+Skill này không thay Codex. ChatGPT dùng skill để điều phối; Codex thực thi code.
+
+## 2. Cài `vibe-coding-manager` ở đâu?
+
+### Khuyến nghị
+
+Cài skill này vào **ChatGPT Web / Skills**.
+
+Lý do:
+- ChatGPT là nơi quản lý product decision, review, Phase/Round và acceptance gate;
+- Codex là nơi làm việc trực tiếp với repository;
+- nếu cài manager skill lên Codex, vai trò dễ bị chồng chéo.
+
+### Cách cài
+
+1. Tải file `skill.zip` được cung cấp.
+2. Mở khu vực Skills của ChatGPT (`/skills` nếu workspace của bạn hỗ trợ đường dẫn này).
+3. Upload/import `skill.zip` theo giao diện Skills hiện có.
+4. Kiểm tra skill `Vibe Coding Manager` xuất hiện trong thư viện.
+5. Dùng trong ChatGPT Project chứa dự án của bạn.
+
+Nếu workspace không cho upload skill, quyền Skills có thể bị giới hạn bởi plan/workspace policy.
+
+## 3. Có cần cài `vibe-coding-manager` lên Codex không?
+
+**Không cần và mặc định không nên.**
+
+Mô hình khuyến nghị:
 
 ```text
-Bạn nói mục tiêu
-→ ChatGPT + skill phân tích và lập kế hoạch
-→ Codex thực hiện code và test
-→ bạn kiểm tra kết quả thực tế
-→ ChatGPT hướng dẫn bước tiếp theo
+ChatGPT Web + vibe-coding-manager
+       ↓
+quyết định / review / prompt
+       ↓
+Codex
+       ↓
+repository / code / tests / git
 ```
 
-## 2. Bốn vai trò cần hiểu
+Chỉ tạo một biến thể Codex-specific trong tương lai nếu bạn quyết định dùng Codex làm orchestrator chính.
 
-### Bạn
+## 4. Kết hợp với `ui-ux-pro-max`
 
-Bạn:
-- nói sản phẩm cần làm gì;
-- cung cấp ảnh/log/ngữ cảnh khi cần;
-- test phần mềm thực tế;
-- chốt OK cuối cùng.
+Upstream:
+https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
 
-Bạn không cần tự sửa code.
+### Có bắt buộc không?
 
-### ChatGPT + vibe-coding-manager
+Không.
 
-ChatGPT là nơi bạn làm việc chính. Skill giúp ChatGPT:
-- brainstorm và phản biện;
-- chia Phase / Round;
-- tạo prompt `/plan` và `/goal`;
-- review plan và kết quả Codex;
-- phát hiện overengineering;
-- hướng dẫn manual QA;
-- kiểm tra checkpoint.
+Bạn có hai mode:
 
-### Codex
+#### Mode A — đơn giản nhất
 
-Codex là nơi thực thi:
-- đọc repository;
-- sửa code;
-- chạy test/build;
-- báo cáo kết quả.
+- `vibe-coding-manager` ở ChatGPT Web;
+- ChatGPT chốt UI direction / Master Design System;
+- lưu `MASTER.md` hoặc UI spec vào project;
+- Codex triển khai theo spec;
+- không cần cài ui-ux-pro-max lên Codex.
 
-### GitHub
+Phù hợp khi UI đơn giản hoặc Master đã rõ.
 
-GitHub lưu:
-- phiên bản ổn định;
-- lịch sử thay đổi;
-- tài liệu và source chuẩn lâu dài.
+#### Mode B — khuyến nghị cho project UI-heavy
 
-## 3. Workflow hằng ngày
+- `vibe-coding-manager` ở ChatGPT Web;
+- `ui-ux-pro-max` cài trong project Codex;
+- Codex dùng specialist này trong UI `/plan` và `/goal`;
+- `MASTER.md` / UI spec đã được user duyệt vẫn là source of truth.
 
-Đối với một tính năng thông thường:
+Phù hợp với web app, dashboard, desktop-like UI, hoặc app cần modernization.
 
-1. Bạn nói ý tưởng với ChatGPT.
-2. ChatGPT làm rõ phạm vi.
-3. Chốt requirement.
-4. Chia Phase / Round nhỏ nếu cần.
-5. ChatGPT tạo prompt `/plan`.
-6. Bạn gửi prompt cho Codex.
-7. Gửi `/plan` Codex trả về lại ChatGPT.
-8. ChatGPT review: `PASS` hoặc `REVISE`.
-9. Khi plan PASS, ChatGPT tạo `/goal`.
-10. Codex triển khai và test.
-11. Gửi báo cáo Codex về ChatGPT.
-12. ChatGPT hướng dẫn test tay.
-13. Chỉ khi bạn test OK mới coi Round hoàn thành.
+## 5. Cài `ui-ux-pro-max` cho Codex
 
-Nguyên tắc: **1 Round = 1 mục tiêu chính**.
+Theo upstream project:
 
-## 4. `/plan` và `/goal` là gì?
+```bash
+npm install -g ui-ux-pro-max-cli
+cd /path/to/your/project
+uipro init --ai codex
+```
 
-### `/plan`
+Python 3.x cần có để search script hoạt động.
 
-Dùng để Codex đọc code và đề xuất cách làm trước khi sửa. ChatGPT sẽ review `/plan` để kiểm tra phạm vi, rủi ro và độ phức tạp.
+Không cần cài cho tất cả project. Cài theo project khi project đó có UI đáng kể là cách dễ kiểm soát nhất.
 
-### `/goal`
+### Update
 
-Chỉ tạo sau khi `/plan` PASS. `/goal` nói rõ:
-- làm gì;
-- không làm gì;
-- test gì bắt buộc;
-- khi nào phải dừng.
+Dùng CLI upstream để update thay vì copy thủ công. Kiểm tra README của upstream khi version thay đổi.
 
-## 5. Prompt mẫu dùng hằng ngày
+## 6. Setup project khuyến nghị
 
-### Khi có ý tưởng
+Trong ChatGPT Project:
 
 ```text
-Tôi muốn thêm tính năng ...
-Hãy brainstorm giúp tôi: mục tiêu, input, output, phạm vi, rủi ro và các câu hỏi còn thiếu.
+Project
+├─ Project Instructions
+├─ PRD / Roadmap / Architecture docs
+├─ UI/UX spec
+├─ Checkpoint docs
+├─ GitHub repo connection (nếu dùng)
+├─ Chat: 00 Project Control
+├─ Chat: Phase N
+└─ Chat: Independent Review Phase N
+```
+
+Trong repository, ưu tiên cấu trúc đang có và chỉ thêm những phần thực sự cần. Một mẫu đơn giản:
+
+```text
+AGENTS.md
+src/ hoặc backend/frontend/
+tests/
+docs/
+├─ PRD...
+├─ ROADMAP...
+├─ CODEX_RULES...
+└─ CHECKPOINTS...
+```
+
+`AGENTS.md` phải ngắn: nó là bản đồ/routing cho Codex, không phải bản sao PRD. Nếu project có design system đã duyệt thì có thể thêm `design-system/`. Không restructure repo chỉ để trông “chuẩn”.
+
+## 7. Cách nói chuyện với skill hằng ngày
+
+Bạn không cần dùng prompt dài.
+
+### Brainstorm
+
+```text
+Tôi muốn thêm bookmark vào video.
+Brainstorm theo workflow vibe coding của tôi.
 Chưa code.
 ```
 
-### Khi requirement đã rõ
+### Phản biện
 
 ```text
-Requirement này đã rõ.
-Hãy chia thành các Phase / Round nhỏ, mỗi Round có mục tiêu, phạm vi, việc không làm và checklist nghiệm thu.
+Đây là proposal đã có.
+Phản biện trước khi chốt.
 ```
 
-### Khi cần `/plan`
+### Chia Round
 
 ```text
-Cho tôi prompt Codex /plan cho Round này.
-Viết bằng tiếng Việt và yêu cầu Codex trả lời hoàn toàn bằng tiếng Việt.
+Requirement đã chốt.
+Chia Phase này thành các Round nhỏ giúp tôi.
 ```
 
-### Khi Codex trả `/plan`
+### Tạo `/plan`
 
 ```text
-Đây là /plan Codex trả về.
-Hãy review, kiểm tra có overengineering không và kết luận PASS hay REVISE.
+Round 2 đã chốt.
+Cho tôi prompt Codex /plan.
 ```
 
-### Khi plan PASS
+### Review `/plan`
 
 ```text
-Plan đã PASS.
+Đây là /plan Codex trả về:
+<paste>
+
+Review giúp tôi trước khi /goal.
+```
+
+### Tạo `/goal`
+
+```text
+Plan PASS.
 Cho tôi prompt /goal.
-Yêu cầu Codex trả lời bằng tiếng Việt.
 ```
 
-### Khi Codex báo hoàn thành
+Skill phải tự merge các guardrail phát hiện trong lúc review vào `/goal`.
+
+### Sau implementation
 
 ```text
-Đây là báo cáo của Codex.
-Tôi chưa test tay.
-Hãy giải thích kết quả cho tôi dễ hiểu và cho tôi checklist test.
+Codex báo xong như sau:
+<paste>
+
+Tôi chưa manual test.
+Cho tôi checklist.
 ```
 
-### Khi gặp lỗi
+### Bug / screenshot
 
 ```text
-Tôi test bước ... bị lỗi.
+Manual test bước 4 bị lỗi.
 Expected: ...
 Actual: ...
-Tôi gửi kèm ảnh/log.
-Hãy giúp tôi xác định bước tiếp theo.
+Ảnh/log đính kèm.
+Theo workflow, giờ nên làm gì?
 ```
 
-## 6. Ngôn ngữ và cách giải thích
+Skill tự quyết định diagnose-first hay tạo Fix Round.
 
-Khi bạn đang nói tiếng Việt:
-- ChatGPT trả lời bằng tiếng Việt;
-- prompt gửi Codex viết bằng tiếng Việt;
-- Codex được yêu cầu phản hồi bằng tiếng Việt;
-- thuật ngữ kỹ thuật được giải thích đơn giản khi cần.
-
-Tên file, API, hàm hoặc code có thể giữ tiếng Anh để tránh sai kỹ thuật.
-
-## 7. Chống overengineering
-
-Skill phải kiểm tra:
-- V1 thực sự cần gì?
-- Có cách đơn giản hơn không?
-- Nếu dùng cách đơn giản thì điều tệ nhất thực tế là gì?
-- Điều đó có gây mất dữ liệu, lộ thông tin, phá dữ liệu hay làm hỏng core workflow không?
-
-Nếu kiến trúc rất phức tạp chỉ để tránh một edge case hiếm, có thể phục hồi và không nguy hiểm, ưu tiên cách đơn giản hơn.
-
-Nguyên tắc: **Stable > Clever**.
-
-## 8. Git và checkpoint
-
-Thông thường:
+### Round PASS
 
 ```text
-Codex code
-→ test tự động
-→ bạn test tay
-→ review cuối
-→ checkpoint
-→ commit / tag / push
+Round này tôi test OK hết.
 ```
 
-Không commit/tag chỉ vì Codex báo test PASS. Bạn là acceptance gate cuối cùng.
+Skill tự xác định còn Round hay đang ở cuối Phase.
 
-## 9. Đồng bộ vibe-coding-manager ở 3 nơi
-
-### ChatGPT — nơi bạn yêu cầu thay đổi
-
-Bạn chỉ cần nói muốn thay đổi gì. ChatGPT có thể giúp sửa skill, tài liệu, ảnh hướng dẫn, validate, đóng gói và đồng bộ GitHub khi được yêu cầu.
-
-Bạn không cần tự sửa `SKILL.md`.
-
-### GitHub — nơi lưu phiên bản chuẩn lâu dài
-
-Repo lưu source, references, docs, ảnh hướng dẫn và lịch sử commit.
-
-### Máy tính — bản clone để đọc
-
-Bản clone trên máy chủ yếu dùng để:
-- đọc `docs/usage-guide.md`;
-- xem ảnh hướng dẫn;
-- giữ bản offline.
-
-Bạn không cần chỉnh skill bằng tay ở đây.
-
-Luồng khuyến nghị:
+### Final Regression
 
 ```text
-Bạn yêu cầu trong ChatGPT
-→ ChatGPT cập nhật skill
-→ ChatGPT cập nhật GitHub
-→ bạn mở GitHub Desktop và Pull origin
-→ máy tính có bản mới để đọc
+Tất cả Round của Phase đã PASS.
+Chuẩn bị Final Regression Review trước checkpoint.
 ```
 
-Sau đó dùng `skill.zip` mới để cập nhật Skill trong ChatGPT.
-
-## 10. Khi update chính vibe-coding-manager
-
-Mỗi lần skill thay đổi đáng kể phải kiểm tra đồng thời:
-- `SKILL.md`;
-- các file trong `references/`;
-- `docs/usage-guide.md` nếu repo lưu guide này;
-- toàn bộ ảnh hướng dẫn;
-- `skill.zip`.
-
-Phân loại ảnh:
-- **KEEP** — vẫn đúng;
-- **UPDATE** — cần chỉnh nhỏ;
-- **REPLACE** — workflow đã đổi;
-- **DELETE** — trùng/thừa/gây rối;
-- **NEW** — cần ảnh mới.
-
-Không coi update hoàn thành nếu skill đã đổi nhưng guide/ảnh còn mô tả workflow cũ.
-
-## 11. Setup ChatGPT Project
-
-Một project nên có các nguồn quan trọng như:
+### Checkpoint
 
 ```text
-Project Instructions
-PRD / Roadmap
-Architecture / Tech Stack
-UI/UX Spec
-Checkpoint docs
-GitHub repository
+Final manual smoke PASS hết.
+Cho tôi prompt checkpoint.
 ```
 
-ChatGPT Project giữ ngữ cảnh. Skill cung cấp workflow. Codex thực thi code.
+## 8. UI workflow
 
-## 12. UI workflow
-
-Nếu thay đổi UI đáng kể:
+### Feature có UI mới
 
 ```text
-Requirement
-→ chốt hướng UI
-→ review
-→ user duyệt
-→ Codex implement
+Functional spec
+→ UI Design Gate
+→ UI specialist / proposal
+→ user chọn direction
+→ freeze UI spec
+→ Round planning
+→ Codex /plan
+→ /goal
 → Functional QA
 → Visual QA
 ```
 
-Không để Codex tự redesign toàn bộ giao diện khi hướng thiết kế chưa được duyệt.
+### App đã chạy nhưng UI xấu
 
-`ui-ux-pro-max` là công cụ hỗ trợ tùy chọn cho project UI-heavy, không phải yêu cầu bắt buộc.
-
-## 13. Chọn model Codex
-
-Skill sẽ đề xuất model theo rủi ro:
-- **Terra Extra High**: phần lớn feature / bug / UI thông thường;
-- **Sol High/Extra High**: architecture, migration, data safety, concurrency, root cause khó, final review;
-- **Luna**: việc nhỏ, rõ, cô lập.
-
-Một Round giữ cùng một model trong cùng Codex session.
-
-## 14. Cuối Phase
-
-Khi tất cả Round đã PASS:
+Không rewrite một lần.
 
 ```text
-Independent Final Regression Review
-→ Final Verification
-→ Final Manual Smoke
-→ user PASS
-→ checkpoint
-→ commit + tag + push
+UI Audit
+→ KEEP / POLISH / REDESIGN / INCONSISTENT
+→ 2–3 design directions
+→ user chọn
+→ MASTER.md
+→ tokens/shared components
+→ migrate từng screen/flow theo Round
+→ Visual QA sau mỗi Round
 ```
 
-Không tự động sang Phase mới trước checkpoint ổn định.
+## 9. Khi nào dùng `ui-ux-pro-max` trong quy trình?
 
-## 15. FAQ
+### Dùng ở UI Design Gate
 
-### Tôi có cần biết lập trình không?
-Không. Bạn cần hiểu sản phẩm mình muốn và kiểm tra kết quả thực tế.
+Để:
+- tạo candidate design system;
+- chọn style/layout/color/typography;
+- kiểm accessibility/responsive;
+- tạo page-specific guidance.
 
-### Tôi có cần tự sửa skill không?
-Không. Bạn có thể yêu cầu ChatGPT sửa.
+### Dùng trong Codex `/plan`
 
-### Tôi có cần tự viết prompt Codex không?
-Không. Skill có thể tạo prompt cho bạn.
+Khi skill đã cài ở project Codex, thêm yêu cầu:
 
-### Tôi có cần biết Git không?
-Không bắt buộc. Với bản clone skill trên máy, thao tác thường xuyên nhất là `Pull origin`.
+```text
+If ui-ux-pro-max is installed, use it for UI design intelligence and stack-specific guidance.
+The approved MASTER.md / page UI spec is authoritative.
+Do not regenerate or replace the Master.
+```
 
-### Máy tính của tôi có phải nguồn chính của skill không?
-Không. Máy tính chủ yếu giữ bản clone để đọc.
+### Dùng trong `/goal`
 
-### GitHub để làm gì?
-Lưu phiên bản chuẩn và lịch sử thay đổi.
+Chỉ để triển khai đúng approved Master/UI spec, không để mở scope.
 
-### ChatGPT để làm gì?
-Đây là nơi bạn điều khiển workflow và yêu cầu thay đổi.
+### Dùng ở Visual QA
 
-## Quy tắc dễ nhớ
+Dùng guideline của specialist để review screenshot, nhưng final acceptance vẫn do user.
 
-**Bạn nói mục tiêu → ChatGPT quản lý → Codex thực hiện → bạn kiểm tra → GitHub lưu kết quả.**
+## 10. Model selection
 
-Khi update chính skill:
+Skill chọn **model + reasoning effort rẻ nhất nhưng vẫn an toàn** theo risk của cả Round:
 
-**ChatGPT sửa → GitHub lưu → máy tính Pull về để đọc.**
+- **Luna**: task rất nhỏ, cơ học, cô lập, dễ verify, không persistence/migration/security/destructive behavior.
+- **Terra Medium/High**: phần lớn feature, UI, API và bug có phạm vi rõ. Medium khi task rõ; High khi cần reasoning nhiều hơn.
+- **Sol High**: migration, data safety, recovery/restore, worker/concurrency, security, destructive operations, root cause khó, high-risk/final review.
+- **Sol Extra High**: ngoại lệ khi failure cost/uncertainty đặc biệt cao hoặc Sol High chưa xử lý đáng tin cậy.
+
+Không dùng Extra High chỉ để “cho chắc”. Giữ cùng model trong một Codex Round session; nếu `/plan` làm lộ risk cao hơn đáng kể thì dừng và mở session mới với model phù hợp.
+
+## 11. GitHub trong workflow
+
+GitHub là stable remote source of truth, không phải lúc nào cũng là current working tree.
+
+Ví dụ:
+
+```text
+GitHub: v0.8 stable
+Codex local: v0.8 + Round 1 + Round 2 chưa commit
+```
+
+ChatGPT đọc GitHub chỉ thấy stable code. Khi review current Round, dùng Codex report/diff/screenshot/log.
+
+Không push mỗi Round chỉ để ChatGPT đọc, trừ khi project cố ý dùng branch-based review.
+
+## 12. Final Phase flow
+
+```text
+All Rounds PASS
+→ new Sol review session
+→ Final Regression Review
+→ blocker? Fix Round
+→ Final Verification
+→ Final Manual Smoke
+→ post-review fix? Delta Verification hoặc full re-review
+→ user final PASS
+→ checkpoint
+→ commit + tag + push + verify remote
+→ Next Phase
+```
+
+## 13. Quy tắc cần nhớ
+
+1. Một Round, một mục tiêu chính.
+2. Một Round, một Codex session, một model.
+3. `/plan` trước `/goal` cho task đáng kể.
+4. Review `/plan` trước khi code.
+5. `/goal` phải chứa guardrail từ plan review.
+6. Automated PASS không thay manual PASS.
+7. UI Round cần Visual QA.
+8. Không workaround để biến missing requirement thành PASS.
+9. Không checkpoint khi còn blocker.
+10. Stable > Clever.
+11. Không refactor stable code chỉ vì đẹp kiến trúc.
+12. Không bắt đầu Phase tiếp theo trước stable checkpoint.
+
+## 14. Tiết kiệm Codex usage
+
+Mặc định dùng mô hình context ba lớp:
+
+```text
+AGENTS.md = luật repo ổn định, ngắn
+Project docs = chi tiết WHAT/architecture/spec
+Prompt = việc đang làm NOW + evidence/delta
+```
+
+Quy tắc chính:
+
+1. Một Round = một Codex session = một model.
+2. `/plan` compact; chỉ dẫn Codex đọc `AGENTS.md` và docs/file liên quan.
+3. Sau `/plan` PASS, `/goal` chỉ nói “implement approved plan from this session” + review delta; không paste lại plan.
+4. Plan cần sửa thì ưu tiên correction delta, không viết lại toàn bộ nếu không cần.
+5. Focused tests trước; full suite ở risk/gate phù hợp.
+6. Nếu automated verification + review + manual QA đã PASS và code không đổi, không chạy lại cùng verification chỉ để lặp evidence.
+7. Independent review chỉ dùng khi risk xứng đáng.
+8. Báo cáo Codex ngắn; không paste full diff/log khi không có lỗi cần xem.
+9. Giữ CWD/model/tool set ổn định trong Round khi thực tế cho phép để hỗ trợ prompt caching tự động.
+10. Không dùng multi-agent/Best-of-N mặc định.
+
+Chi tiết: `references/token-efficiency.md`.
+
+## 15. Cấu trúc repository
+
+Skill không ép một cây thư mục cứng cho mọi project. Nguyên tắc là:
+
+- giữ cấu trúc hiện có trước;
+- top-level ít và dễ hiểu;
+- mỗi concern có một nơi chính;
+- không tạo folder theo Phase/Round;
+- runtime/generated data không nằm trong repo trừ fixture/test data có chủ đích;
+- tránh nhiều layer/abstraction nếu chưa có nhu cầu thật;
+- test phải dễ tìm theo subsystem;
+- docs có một canonical source of truth, tránh `final_v2_latest`;
+- chỉ restructure khi có vấn đề cụ thể và lợi ích rõ ràng.
+
+Với người không có nền tảng công nghệ, ChatGPT/Codex phải tự đề xuất nơi đặt code phù hợp và chỉ hỏi user khi quyết định ảnh hưởng product behavior, data safety, chi phí hoặc maintainability.
+
+Chi tiết: `references/repository-structure.md`.
+
+## 16. Quick-start cho một project mới
+
+```text
+1. Tạo ChatGPT Project.
+2. Thêm project instructions và canonical docs.
+3. Tạo root `AGENTS.md` ngắn để route Codex tới đúng docs/rules.
+4. Cài vibe-coding-manager vào ChatGPT Web.
+5. Nếu UI-heavy, cài ui-ux-pro-max vào repo Codex khi thực sự cần.
+6. Brainstorm / critique / freeze spec.
+7. Nếu có UI đáng kể, chốt Master/UI spec.
+8. Chia Phase / Round.
+9. Mỗi Round: risk → model/effort → session mới → compact /plan → review → compact /goal → focused verification → user QA.
+10. Cuối Phase: independent Final Regression → final verify → manual smoke → checkpoint.
+```

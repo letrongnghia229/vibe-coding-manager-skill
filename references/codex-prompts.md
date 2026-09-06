@@ -1,467 +1,334 @@
-# Codex Prompt Templates
+# Codex Prompt Templates — Compact by Default
 
 ## Table of contents
 
-0. Shared language and simplicity block
-1. Normal Round `/plan`
-2. Normal Round `/goal`
-3. UI Round `/plan`
-4. UI Round `/goal`
+1. Principle
+2. Normal Round `/plan`
+3. Normal Round `/goal` and correction delta
+4. UI Round additions
 5. Diagnose-only
-6. Manual Smoke Inspection
+6. Manual-smoke discrepancy
 7. Confirmed Fix Round `/plan`
 8. Confirmed Fix Round `/goal`
-9. Final Regression Review `/plan`
-10. Final Verification `/goal`
-11. Final Delta Verification
-12. Checkpoint
+9. Independent implementation review
+10. Final Regression Review
+11. Final Verification
+12. Final Delta Verification
+13. Checkpoint
+14. Compact implementation report request
 
+## Principle
 
-Use these as adaptable templates. Keep only the sections relevant to the current project/task.
+Prompts should carry only information Codex does **not** already have from:
 
-## 0. Shared language and simplicity block
+1. repository `AGENTS.md`;
+2. relevant project docs;
+3. the active Codex session;
+4. the approved `/plan` in that session.
 
-For a non-technical user, prepend or include this block in every substantial Codex prompt. Replace `<USER_LANGUAGE>` with the user's current language.
+Do not repeat stable project rules or the full approved plan unless context was lost/restarted.
 
-```text
-LANGUAGE / USER LEVEL:
-- Respond entirely in <USER_LANGUAGE>.
-- The user does not have a software-development background.
-- Explain important technical terms briefly in plain language.
-- Focus on what a mechanism does and why it is necessary.
-- Keep file names, function names, class names, API names, states, and code identifiers unchanged.
+Ask Codex to inspect the smallest relevant surface first and keep reports concise.
 
-SIMPLICITY POLICY:
-- Prefer the smallest stable solution that satisfies the accepted current requirement.
-- Do not add future-proof infrastructure for hypothetical future needs.
-- Do not introduce a scheduler, global state machine, exact-once machinery, global revision tracking, reconciliation layers, or new migrations unless the current requirement genuinely needs them.
-- If the implementation becomes materially more complex than the user-visible goal suggests, STOP and explain why a simpler solution is insufficient before proceeding.
-- A rare, recoverable, non-destructive imperfection is acceptable when avoiding it would require disproportionate architecture.
-
-At the end, add a short section titled:
-PLAIN-LANGUAGE SUMMARY FOR A NON-TECHNICAL USER
-Explain in at most 10 lines what is proposed/done, why it is needed, the realistic remaining risk, and the user's next action.
-```
-
-When the user's language is Vietnamese, translate the block itself into Vietnamese in the generated prompt. Do not leave the operational prompt in English unless the user requested English.
+For token/credit policy, see `token-efficiency.md`.
 
 ## 1. Normal Round `/plan`
 
-Include the Shared language and simplicity block when the user is non-technical.
-
 ```text
 /plan
 
-[TASK / ROUND NAME]
+[ROUND NAME]
 
-CONTEXT:
-<current Phase/Round, stable baseline, relevant docs>
+Read AGENTS.md and only the relevant project docs/files.
 
-CURRENT PROBLEM:
-<actual behavior / technical issue>
+GOAL:
+<one concise goal>
 
-EXPECTED:
-<desired behavior>
+CURRENT GAP / EVIDENCE:
+<only current behavior, screenshot/log/diff facts>
 
-SCOPE:
-<what may change>
-
-NON-GOALS:
-<what must not change>
-
-ACCEPTANCE CRITERIA:
+ACCEPTANCE:
 1. ...
 2. ...
 
-Read the relevant project docs and inspect the current implementation.
-
 PLAN ONLY.
-
-Return:
-1. Root cause.
-2. Relevant data/state/control flow.
-3. Smallest viable solution.
-4. Why any proposed new architecture/state/migration is actually necessary.
-5. Worst realistic consequence of choosing the simpler solution.
-6. Files/components/functions expected to change.
-7. Migration/backward-compatibility implications.
-8. Regression risks.
-9. Tests to add/run.
-10. Smallest safe implementation plan.
-
-DO NOT modify files.
-DO NOT commit/tag/push.
-DO NOT start the next Round/Phase.
-Stop after the plan for review.
+Return: root cause/current flow, smallest safe change, files, risks, migration/backward-compatibility impact, tests.
+Do not modify files. Do not commit/tag/push. Do not start the next Round/Phase.
+Stop for review.
 ```
+
+Add scope/non-goals only when they are not already obvious from `AGENTS.md`/project docs or when scope creep is a material risk.
 
 ## 2. Normal Round `/goal`
 
-Include the Shared language and simplicity block when the user is non-technical.
-
-Generate this only after the plan is approved.
+Generate only after `/plan` PASS and preferably in the **same Codex session**.
 
 ```text
 /goal
 
-[TASK / ROUND NAME]
+[ROUND NAME]
 
 Implement the approved plan from this session.
 
-BASELINE / CURRENT STATUS:
-<...>
+REVIEW DELTAS / GUARDRAILS:
+- <only corrections/constraints added during plan review; omit if none>
 
-CORE GOAL:
-<...>
-
-SCOPE:
-<...>
-
-NON-GOALS:
-<...>
-
-APPROVED PLAN GUARDRAILS:
-<merge any review corrections or extra constraints here>
-
-REQUIRED BEHAVIOR / ACCEPTANCE:
-1. ...
-2. ...
-
-REGRESSION PROTECTION:
-- preserve previously accepted behavior;
-- preserve project-specific data/state/safety constraints;
-- do not refactor unrelated stable code;
-- do not reintroduce complexity that the approved plan intentionally avoided;
-- if implementation reality requires materially broader architecture, STOP and report instead of improvising.
-
-TESTS / VERIFICATION:
-- focused tests;
-- relevant regression tests;
-- production build when applicable;
-- smoke tests when applicable;
+VERIFICATION:
+- focused tests for changed behavior;
+- directly relevant regressions;
+- broaden only if Round risk requires it;
 - git diff --check.
 
-If a requirement conflicts with the approved plan or repository reality, STOP and ask.
+If repository reality materially conflicts with the approved plan, STOP and report before improvising.
+Do not commit/tag/push. Do not start the next Round/Phase.
 
-DO NOT commit/tag/push.
-DO NOT start the next Round/Phase.
-
-After automated verification, STOP and report:
-1. root cause addressed;
-2. files changed;
-3. behavior changed;
-4. test/build/smoke results;
-5. known issues;
-6. simple manual acceptance steps for the user.
+Report concisely: files changed, behavior changed, exact PASS/FAIL verification, deviations/risks, manual QA steps.
+Do not restate the plan or paste large diffs/logs.
 ```
 
-## 3. UI Round `/plan`
+### When the `/goal` session is not the `/plan` session
 
-Add this block to the normal `/plan` when the UI Design Gate has been approved:
+Provide a **compact approved-plan summary**, not the full plan transcript:
 
 ```text
-UI SOURCE OF TRUTH:
-- Read the approved Master Design System and page-level UI spec first.
-- Preserve existing product/interaction semantics unless explicitly changed.
-- Do not invent a new visual style.
-- If ui-ux-pro-max is installed, use it only as design intelligence consistent with the approved Master/UI spec.
-
-Inspect:
-- information hierarchy;
-- layout/scroll ownership;
-- responsive behavior;
-- shared components/tokens;
-- accessibility/focus states;
-- loading/empty/error states;
-- existing component/state boundaries.
-
-The plan must explain how the UI can be implemented without unnecessary business-logic or backend refactors.
+APPROVED PLAN SUMMARY:
+- goal: ...
+- canonical change point: ...
+- critical guardrails: ...
+- acceptance: ...
 ```
 
-## 4. UI Round `/goal`
+### When a plan needs revision
 
-Add this block to the normal `/goal`:
-
-```text
-UI IMPLEMENTATION RULES:
-- Follow the approved Master Design System and page/UI spec.
-- Reuse approved shared components/tokens where practical.
-- Do not regenerate or replace the Master Design System.
-- Do not change API/database/business logic unless the approved plan requires it.
-- Preserve keyboard/focus/accessibility behavior.
-- Prevent page-level horizontal overflow unless explicitly intended.
-- Add/update visual and interaction tests where practical.
-- After implementation, stop for Functional QA + Visual QA.
-```
-
-## 5. Diagnose-only
-
-Include the Shared language and simplicity block when the user is non-technical.
-
-```text
-DIAGNOSE ONLY.
-
-PROBLEM:
-<...>
-
-EVIDENCE:
-<screenshots/logs/runtime behavior>
-
-DO NOT modify code.
-DO NOT reset or destroy data unless inspection absolutely requires it and the user approves.
-
-Inspect:
-1. runtime/process/state;
-2. logs;
-3. relevant database/state;
-4. current implementation;
-5. project/spec expectations.
-
-Return:
-CONFIRMED:
-- ...
-
-LIKELY:
-- ...
-
-UNKNOWN:
-- ...
-
-Then recommend the smallest next action.
-Stop before editing.
-```
-
-## 6. Manual Smoke Inspection
-
-Include the Shared language and simplicity block when the user is non-technical.
-
-Use when the manual test reveals a discrepancy and it is unclear whether the feature is missing, deferred, or intentionally out of scope.
-
-```text
-MANUAL SMOKE INSPECTION — DO NOT MODIFY CODE
-
-EXPECTED:
-<...>
-
-ACTUAL:
-<...>
-
-EVIDENCE:
-<...>
-
-Inspect the current implementation and the accepted spec/design/roadmap.
-
-Answer:
-1. Does the capability exist in backend/service/API?
-2. Is it exposed in the current user-facing workflow/UI if required?
-3. What exact code/spec evidence supports the answer?
-4. Classify the discrepancy as exactly one of:
-   A. INTENTIONAL SCOPE
-   B. DOCUMENTED DEFERRED
-   C. IMPLEMENTATION GAP
-5. If it is an implementation gap, identify the smallest correct Fix Round scope.
-
-Do not create a workaround and call the requirement satisfied.
-Do not edit files.
-Do not commit/tag/push.
-```
-
-## 7. Confirmed Fix Round `/plan`
-
-Include the Shared language and simplicity block when the user is non-technical.
+Prefer a correction delta instead of restating the whole plan:
 
 ```text
 /plan
 
-[FINAL/FOCUSED FIX ROUND]
+CORRECTION DELTA ONLY
 
-A real blocker/gap has been confirmed during QA/review.
+Keep the previous plan unchanged except:
+1. <correction>
+2. <correction>
 
-CONFIRMED ROOT CAUSE / GAP:
-<...>
-
-REQUIRED FIX:
-<...>
-
-PRESERVE:
-<already accepted behavior>
-
-NON-GOALS:
-<...>
-
-PLAN ONLY.
-
-Return:
-A. Existing contract/data flow
-B. Exact insertion/fix point
-C. Smallest safe change
-D. Tests/regressions
-E. Files expected to change
-F. Risks
-
-DO NOT modify code.
-DO NOT commit/tag/push.
-Stop for review before `/goal`.
+Return only the corrected contract/flow, affected tests/risks, and confirmation that all other plan sections remain unchanged.
+PLAN ONLY. Do not modify files.
 ```
 
-## 8. Confirmed Fix Round `/goal`
+Request a full rewritten plan only when the original plan is structurally invalid or the session lost reliable context.
 
-Include the Shared language and simplicity block when the user is non-technical.
+## 3. UI Round additions
+
+Add to `/plan` only when the UI Design Gate applies:
+
+```text
+UI SOURCE OF TRUTH:
+Read the approved Master/page UI spec. Preserve product semantics and existing tokens/components where practical.
+Do not invent a new visual direction.
+Plan layout/scroll/responsive/accessibility/loading/empty/error states without unrelated backend refactors.
+```
+
+Add to `/goal`:
+
+```text
+UI GUARDRAIL:
+Implement the approved Master/page spec; do not redesign it or change API/database behavior outside the approved plan.
+Stop for Functional QA + Visual QA.
+```
+
+## 4. Diagnose-only
+
+```text
+DIAGNOSE ONLY
+
+PROBLEM:
+<actual behavior>
+
+EVIDENCE:
+<only relevant screenshot/log/runtime facts>
+
+Inspect runtime/state/logs/database/code/spec as needed, narrowly first.
+Return:
+- CONFIRMED
+- LIKELY
+- UNKNOWN
+- smallest next action
+
+Do not modify code/data. Do not commit/tag/push.
+```
+
+## 5. Manual-smoke discrepancy
+
+```text
+MANUAL SMOKE INSPECTION — NO EDITS
+
+EXPECTED: <...>
+ACTUAL: <...>
+EVIDENCE: <...>
+
+Trace accepted requirement -> implementation -> user workflow.
+Classify exactly:
+A. INTENTIONAL SCOPE
+B. DOCUMENTED DEFERRED
+C. IMPLEMENTATION GAP
+
+If C, identify the smallest Fix Round scope.
+Do not create a workaround and call it satisfied.
+```
+
+## 6. Confirmed Fix Round `/plan`
+
+```text
+/plan
+
+[FIX ROUND]
+
+CONFIRMED GAP:
+<root cause/evidence>
+
+REQUIRED FIX:
+<smallest expected correction>
+
+PRESERVE:
+<accepted behavior at risk>
+
+PLAN ONLY.
+Return: exact fix point, smallest change, files, tests, risks.
+Do not modify files. Do not commit/tag/push. Stop for review.
+```
+
+## 7. Confirmed Fix Round `/goal`
 
 ```text
 /goal
 
-Implement the approved focused Fix Round plan.
+Implement the approved Fix Round plan from this session.
 
-ROOT CAUSE:
-<confirmed>
+REVIEW DELTAS:
+- <only new guardrails, if any>
 
-SCOPE:
-<...>
-
-PRESERVE:
-<...>
-
-ACCEPTANCE:
-<...>
-
-Add a regression test that proves the bug/gap cannot silently return when practical.
-
-Run focused tests + directly relevant regression tests + build/smoke as applicable + git diff --check.
-
-DO NOT commit/tag/push.
+Add a focused regression test when practical.
+Run focused + direct regression tests; broaden only if the fix touches high-risk persistence/recovery/concurrency/security/destructive behavior.
+Do not commit/tag/push.
 Stop for manual retest of the failed acceptance step.
+Report concise results; do not restate the plan.
 ```
 
-## 9. Final Regression Review `/plan`
+## 8. Independent implementation review
 
-Include the Shared language and simplicity block when the user is non-technical.
+Use only when risk justifies a separate reviewer.
+
+```text
+INDEPENDENT REVIEW — NO EDITS
+
+[ROUND NAME]
+
+Use current local worktree as authority for uncommitted work. Read AGENTS.md and relevant docs.
+Review the implementation against the accepted Round behavior, especially:
+- correctness/canonical flow;
+- migration/data safety if relevant;
+- recovery/concurrency/destructive risk if relevant;
+- scope/dead complexity;
+- tests and regressions.
+
+Return:
+VERDICT: PASS or REVISE
+BLOCKERS: <NONE or numbered>
+NON-BLOCKING: <short>
+MANUAL-QA READINESS: YES/NO
+TEST EVIDENCE: <exact commands/results>
+
+Do not block for style. Do not modify files. Do not commit/tag/push.
+```
+
+For high-risk reviews, add only the specific frozen invariants that are not already in repo docs/current approved plan.
+
+## 9. Final Regression Review
 
 ```text
 /plan
 
-PHASE [N] — FINAL REGRESSION REVIEW BEFORE CHECKPOINT
+PHASE [N] — FINAL REGRESSION REVIEW
 
-PREVIOUS STABLE CHECKPOINT:
-<tag/commit>
-
-CURRENT STATE:
-All planned Phase Rounds have passed user acceptance. The working tree contains the complete uncommitted/uncheckpointed Phase work.
-
-GOAL:
-Independently review the full diff from the previous stable checkpoint to the current working tree.
+PREVIOUS STABLE CHECKPOINT: <tag/commit>
+CURRENT: all planned Rounds accepted; current local worktree contains uncommitted Phase work.
 
 REVIEW ONLY.
-DO NOT modify code.
-DO NOT commit/tag/push.
-DO NOT start the next Phase.
-
-Review for:
-- regressions in previous capabilities;
-- duplicated or competing sources of truth;
-- data/schema/reconciliation safety;
-- rollback/atomicity/idempotency/orphan prevention;
-- state/persistence/resume errors;
-- stale async/race bugs;
-- destructive filesystem risk;
-- security/auth risk where relevant;
-- manual-edit/user-data preservation;
-- performance problems that affect accepted behavior;
-- missing tests;
-- unnecessary complexity that threatens correctness/stability.
-
-Do not request refactors merely for style/elegance.
+Review stable checkpoint -> current worktree for real blockers: regressions, duplicate authority, migration/data safety, persistence/recovery, concurrency/races, destructive filesystem, security, user-data preservation, missing critical tests, complexity that threatens stability.
 
 Return only:
-A. Confirmed-correct areas
-B. Blocking issues
-C. Non-blocking observations
-D. Exact final verification tests/smokes
-E. Verdict:
-   READY FOR FINAL VERIFICATION
-   or
-   MUST FIX BEFORE CHECKPOINT
+A. confirmed-correct areas
+B. blockers
+C. non-blocking observations
+D. exact final verification set
+E. READY FOR FINAL VERIFICATION or MUST FIX BEFORE CHECKPOINT
+
+Do not modify files. Do not commit/tag/push. Do not start next Phase.
 ```
 
-## 10. Final Verification `/goal`
+## 10. Final Verification
 
-Include the Shared language and simplicity block when the user is non-technical.
-
-Use only after Final Regression Review has no blocker.
+Use only after final review has no blocker.
 
 ```text
 /goal
 
 PHASE [N] — FINAL VERIFICATION
 
-No implementation blocker remains from the independent final regression review.
-
-DO NOT add features.
-DO NOT refactor unrelated code.
-DO NOT commit/tag/push yet unless the user has already completed final manual acceptance and explicitly authorized checkpointing.
-
-Run the approved final verification set:
-- full relevant automated test suites;
-- production build;
-- launcher/runtime smoke where applicable;
-- Phase-specific high-risk regressions;
-- git diff --check;
-- git status inspection.
-
-Report exact PASS/FAIL evidence and then STOP for final manual smoke.
+Run the approved final verification set only.
+Do not add features or refactor unrelated code.
+Report exact PASS/FAIL evidence, git diff --check, and working-tree status.
+Do not commit/tag/push yet unless final manual acceptance is already complete and checkpointing is explicitly authorized.
+Stop for final manual smoke.
 ```
 
+Do not repeat a full verification cycle after final manual PASS if **no code changed** since this verification.
+
 ## 11. Final Delta Verification
-
-Include the Shared language and simplicity block when the user is non-technical.
-
-Use after a narrow post-review fix.
 
 ```text
 FINAL DELTA VERIFICATION
 
-A narrow Fix Round changed the working tree after Final Regression Review.
+A narrow post-review fix changed the worktree.
+Verify only the delta + direct regression surface unless evidence shows broader risk.
 
-Review and verify only the delta and its direct regression surface unless new evidence indicates broader risk.
-
-Verify:
-- changed files/behavior;
-- failed manual-smoke step;
-- direct dependencies;
-- focused + relevant regression tests;
-- build/smoke as applicable;
-- git diff --check.
-
-If the change unexpectedly affects schema, canonical data, persistence/recovery, concurrency/job lifecycle, destructive filesystem behavior, security, or broad architecture, STOP and recommend a full Final Regression Review again.
+If the fix touches migration/schema, canonical data, persistence/recovery, concurrency/job lifecycle, destructive filesystem, security, or broad architecture, STOP and require broader final review/verification.
 
 Do not commit/tag/push.
 ```
 
 ## 12. Checkpoint
 
-Include the Shared language and simplicity block when the user is non-technical.
-
 ```text
 FINAL MANUAL ACCEPTANCE: PASS
 
-Create stable checkpoint:
-<TAG>
+Create checkpoint: <TAG>
 
-Before any Git write:
-1. run the required final tests/build/smoke;
-2. run git diff --check;
-3. if anything fails, STOP without commit/tag/push.
+If no code changed since the last successful final verification, do not rerun the same expensive suite solely for duplication unless project policy requires it.
+Always run/confirm the minimum pre-Git safety checks required by the project (at least git diff --check/status and any explicitly mandated build/test gate).
 
-If everything passes:
-4. update checkpoint/release documentation;
-5. commit the accepted Phase changes;
-6. create the exact tag;
-7. push the intended branch;
-8. push the exact tag;
-9. verify remote branch contains the commit;
-10. verify remote tag exists and points to the intended commit;
-11. verify local working tree is clean.
+If required checks pass:
+- update checkpoint/release docs;
+- commit accepted Phase changes;
+- create exact tag;
+- push intended branch + tag;
+- verify remote commit/tag;
+- verify clean local worktree.
 
-Report commit SHA, tag, remote verification, and clean status.
-DO NOT start the next Phase.
+If anything fails, STOP before declaring checkpoint complete.
+Do not start the next Phase.
+```
+
+## 13. Compact implementation report request
+
+Use when Codex tends to over-report:
+
+```text
+Báo cáo ngắn gọn bằng tiếng Việt:
+1. file đã đổi;
+2. hành vi đã đổi;
+3. test/build/smoke + PASS/FAIL;
+4. deviation/blocker/known risk;
+5. manual QA.
+Không lặp lại plan. Không paste diff/log dài nếu không có lỗi cần xem.
 ```

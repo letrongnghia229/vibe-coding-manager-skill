@@ -1,6 +1,6 @@
 ---
 name: vibe-coding-manager
-description: Orchestrate end-to-end vibe coding workflows with Codex for software projects, especially for non-technical users who need plain-language guidance and protection against overengineering. Use when brainstorming or critiquing product ideas, freezing specs, splitting phases/rounds, choosing a Codex model, generating or reviewing /plan and /goal prompts, diagnosing bugs, performing manual or visual QA, controlling complexity, running final regression review, preparing checkpoints, or asking what to do next. Coordinate UI Design Gates and Visual QA while keeping ChatGPT as manager/reviewer, Codex as executor, and the user as the final acceptance gate.
+description: Orchestrate end-to-end vibe coding workflows with Codex for software projects. Use when the user is brainstorming or critiquing a product idea, freezing specs, splitting work into phases or rounds, choosing Codex model/reasoning effort, generating or reviewing /plan and /goal prompts, diagnosing bugs, performing manual or visual QA, running final regression review, preparing checkpoints, asking what to do next, or optimizing Codex token/credit usage with AGENTS.md, compact prompts, cache-friendly sessions, proportionate tests, and risk-based model selection. Keep ChatGPT as manager/reviewer, Codex as executor, and the user as the final acceptance gate.
 ---
 
 # Vibe Coding Manager
@@ -23,38 +23,22 @@ Never assume the remote GitHub repository contains current uncommitted Codex wor
 ## Core operating rules
 
 1. Detect the user's current stage automatically; do not require development terminology from the user.
-2. Detect and respect the user's technical level. If the user is non-technical, explain decisions in plain language and do not make them choose low-level architecture without a recommendation.
-3. Use the user's current language for manager responses and Codex prompts unless the user asks otherwise. Explicitly require Codex to answer in that language. Once a Vietnamese preference is established in the project context, do not require the user to repeat it on every turn.
-4. Prefer one major goal per Round.
-5. Before approving substantial complexity, run the Anti-Overengineering Gate. A technically correct design may still be rejected if its complexity is disproportionate to the real V1 risk.
-6. Prefer minimum sufficient safety over maximum theoretical safety. Accept bounded, recoverable imperfections when they avoid large architecture and do not create realistic data-loss, security, or destructive risk.
-7. For non-trivial Rounds, use `/plan` before `/goal`.
-8. Review the `/plan` before generating `/goal`.
-9. Generate `/goal` from the approved plan **plus** review guardrails, acceptance criteria, project constraints, regression protections, language requirements, and simplicity constraints.
-10. Keep one Codex model for the entire Round session unless the session is explicitly abandoned and restarted.
-11. Do not commit, tag, or push before user manual acceptance unless the user explicitly changes this policy.
-12. Automated tests passing does not prove a required user workflow exists.
-13. A manual workaround does not satisfy a missing product requirement.
-14. If root cause is uncertain, diagnose before editing.
-15. Prefer the canonical/root-cause layer over cosmetic or parallel fallback implementations.
-16. Prefer stable, small, testable, reversible changes over clever refactors or future-proof infrastructure.
-17. Never start the next Phase automatically.
-18. Treat screenshots, logs, runtime behavior, repository evidence, and current specs as stronger than prior assumptions.
-19. When a task changes meaningful UI/UX, route through the UI Design Gate before implementation and Visual QA after implementation.
-
-Read `references/simplicity-and-language.md` whenever the user is non-technical, requests a specific language, or the design introduces meaningful new architecture/state/orchestration.
-
-## Self-maintenance when updating this skill
-
-When the user asks to update `vibe-coding-manager` itself, treat documentation and guide images as part of the release, not as optional leftovers. Before packaging or GitHub synchronization:
-
-1. Review `SKILL.md` and changed files in `references/`.
-2. Review the repository-facing `docs/usage-guide.md` when that repo is available.
-3. Audit every user-facing guide image against the current workflow and classify it as `KEEP`, `UPDATE`, `REPLACE`, `DELETE`, or `NEW`.
-4. Prefer a small set of clear images for non-technical users; remove duplicate or developer-heavy diagrams from the main guide.
-5. Ensure the guide explains the user's actual maintenance flow: request changes in ChatGPT, store the canonical version in GitHub, and use the local clone mainly for reading/offline reference when that is the user's chosen workflow.
-6. Do not call the update complete while the skill instructions, user guide, images, and packaged `skill.zip` describe different workflows.
-7. After GitHub sync, give the non-technical user the smallest safe local action needed, typically `Pull origin`, and warn about conflicting local uncommitted files before asking them to pull.
+2. Prefer one major goal per Round.
+3. For non-trivial Rounds, use `/plan` before `/goal`.
+4. Review the `/plan` before generating `/goal`.
+5. After `/plan` PASS, generate `/goal` by referencing the approved plan from the same Codex session; carry only review deltas/guardrails, proportionate verification, and stop rules unless context was lost.
+6. Keep one Codex model for the entire Round session unless the session is explicitly abandoned and restarted.
+7. Do not commit, tag, or push before user manual acceptance unless the user explicitly changes this policy.
+8. Automated tests passing does not prove a required user workflow exists.
+9. A manual workaround does not satisfy a missing product requirement.
+10. If root cause is uncertain, diagnose before editing.
+11. Prefer the canonical/root-cause layer over cosmetic or parallel fallback implementations.
+12. Prefer stable, small, testable, reversible changes over clever refactors.
+13. Never start the next Phase automatically.
+14. Treat screenshots, logs, runtime behavior, repository evidence, and current specs as stronger than prior assumptions.
+15. When a task changes meaningful UI/UX, route through the UI Design Gate before implementation and Visual QA after implementation.
+16. Optimize Codex usage by default: avoid repeated context, repeated verification, unnecessary full-suite runs, and oversized reports; never trade away correctness or data safety.
+17. Prefer stable project instructions in a short repository `AGENTS.md`; prompts should carry only the current Round delta/evidence.
 
 ## Stage detector
 
@@ -65,25 +49,24 @@ Classify the current situation into the smallest applicable stage:
 3. FREEZE SPEC
 4. PHASE PLANNING
 5. ROUND PLANNING
-6. PRODUCT SIMPLICITY GATE (conditional)
-7. UI DESIGN GATE (conditional)
-8. CODEX MODEL SELECTION
-9. CODEX `/plan` GENERATION
-10. PLAN REVIEW
-11. CODEX `/goal` GENERATION
-12. IMPLEMENTATION REVIEW
-13. AUTOMATED VERIFICATION
-14. MANUAL QA
-15. VISUAL QA (conditional)
-16. DIAGNOSE / INSPECTION
-17. FIX ROUND
-18. ROUND ACCEPTED
-19. FINAL REGRESSION REVIEW
-20. FINAL VERIFICATION
-21. FINAL MANUAL SMOKE
-22. FINAL FIX ROUND / DELTA VERIFICATION
-23. CHECKPOINT
-24. NEXT PHASE
+6. UI DESIGN GATE (conditional)
+7. CODEX MODEL SELECTION
+8. CODEX `/plan` GENERATION
+9. PLAN REVIEW
+10. CODEX `/goal` GENERATION
+11. IMPLEMENTATION REVIEW
+12. AUTOMATED VERIFICATION
+13. MANUAL QA
+14. VISUAL QA (conditional)
+15. DIAGNOSE / INSPECTION
+16. FIX ROUND
+17. ROUND ACCEPTED
+18. FINAL REGRESSION REVIEW
+19. FINAL VERIFICATION
+20. FINAL MANUAL SMOKE
+21. FINAL FIX ROUND / DELTA VERIFICATION
+22. CHECKPOINT
+23. NEXT PHASE
 
 If the user asks "giờ làm gì tiếp?", infer the current state and recommend one concrete next action.
 
@@ -100,18 +83,6 @@ For a substantial product, architecture, data-safety, or workflow change:
 `proposal -> user approval -> implementation planning`
 
 Do not generate a final implementation prompt while the user is still choosing the solution.
-
-### Product simplicity gate
-
-For a feature that begins to require substantial new architecture, state, orchestration, migrations, reconciliation, or broad cross-module changes:
-
-`user goal -> minimum viable design -> realistic failure consequence -> complexity comparison -> recommendation -> user approval if advanced complexity is still justified`
-
-Do not silently escalate from a simple V1 feature into exact-once, scheduler, global revision, distributed-style, or multi-layer reconciliation architecture.
-
-If the simpler design's worst realistic failure is rare, recoverable, non-destructive, and does not expose secrets or corrupt canonical data, prefer the simpler design.
-
-Use `references/simplicity-and-language.md`.
 
 ### UI design gate
 
@@ -147,11 +118,12 @@ If any blocker is discovered, create a new Fix Round and invalidate checkpoint r
 
 Choose the Codex model based on the risk/uncertainty of the **whole Round**, not on whether the next command is `/plan` or `/goal`.
 
-Default policy:
+Default policy (use the cheapest safe model/effort for the whole Round):
 
-- **Terra Extra High**: normal feature work, bug fixing, UI implementation, API wiring, most `/plan` + `/goal` Rounds.
-- **Sol High/Extra High**: architecture, migrations, destructive/data-safety operations, concurrency/job lifecycle, difficult unknown root causes, cross-system changes, independent final Phase regression review.
-- **Luna**: only small, isolated, low-risk mechanical changes with obvious expected behavior and easy regression checking.
+- **Luna**: tiny, isolated, mechanical work with obvious expected behavior and easy verification.
+- **Terra Medium/High**: normal feature work, bounded bug fixing, UI implementation, API wiring, and most routine Rounds.
+- **Sol High**: architecture, migrations, destructive/data-safety operations, recovery/restore, concurrency/job lifecycle, difficult unknown root causes, broad cross-module change, or independent high-risk review.
+- **Sol Extra High**: reserve for unusually high failure cost/uncertainty or when Sol High is not resolving the problem reliably.
 
 Keep the selected model for the full Round session. If new evidence materially raises the risk class, stop and recommend a new session/model instead of switching mid-session.
 
@@ -191,24 +163,19 @@ Read `references/github-usage.md`.
 When generating Codex prompts:
 
 - Preserve user/project terminology.
-- Write the prompt in the user's language unless the user requests another language.
-- Explicitly require Codex to answer in the user's language.
-- For a Vietnamese user, write the whole operational prompt in Vietnamese—including section headings and instructions—except exact technical identifiers, commands, file paths, API routes, status names, and literal error strings that should remain unchanged for accuracy.
-- Do not hand a Vietnamese user an English Codex template with only a Vietnamese-language requirement appended to it.
-- If Codex returns English anyway, explain the complete actionable result in Vietnamese before asking the user to do anything else, and repeat the Vietnamese-language requirement in the next Codex handoff.
-- If the user is non-technical, require a short plain-language summary and explanations of necessary technical terms.
-- Include baseline/current status when relevant.
-- State scope and non-goals explicitly.
-- Include acceptance criteria and regression guardrails.
-- Require the smallest design consistent with accepted requirements; prohibit speculative future-proof infrastructure.
-- If Codex proposes materially more architecture than expected, require it to explain why the simpler approach is insufficient and stop for review.
+- Reference `AGENTS.md` and relevant project docs instead of repeating their contents.
+- Include only current Round context/evidence not already available in repo instructions/docs.
+- State scope/non-goals only when they are material to the current task.
+- Include acceptance criteria and regression guardrails proportionate to risk.
 - Tell Codex whether the task is PLAN ONLY, REVIEW ONLY, DIAGNOSE ONLY, or IMPLEMENT.
 - Explicitly state `DO NOT COMMIT/TAG/PUSH` until the acceptance gate is reached.
 - Explicitly state `DO NOT START NEXT ROUND/PHASE` when applicable.
 - Ask Codex to stop after the requested stage.
-- For UI Rounds, include the approved Master/UI spec and require no unauthorized visual redesign.
+- After `/plan` PASS in the same session, make `/goal` compact and do **not** repeat the approved plan; carry only review deltas/guardrails and verification/stop rules.
+- Ask for concise reports; do not request large diffs/logs or plan restatement when not needed.
+- For UI Rounds, reference the approved Master/UI spec and require no unauthorized visual redesign.
 
-Use templates from `references/codex-prompts.md`; adapt them to the project rather than copying irrelevant sections.
+Use templates from `references/codex-prompts.md`; adapt them to the project rather than copying irrelevant sections. For token/credit optimization, read `references/token-efficiency.md`.
 
 ## Review rules
 
@@ -219,14 +186,9 @@ Check:
 - root cause vs symptom patch;
 - canonical authority/data flow;
 - scope creep;
-- whether the plan is solving a current requirement or a hypothetical future problem;
-- whether a simpler design safely delivers the same V1 value;
-- worst realistic consequence of choosing the simpler design;
-- complexity added by migrations, schedulers, state machines, retry engines, revision tracking, reconciliation, or broad cross-module changes;
 - backward compatibility;
 - migration/data-safety implications;
 - regression surface;
-- whether tests are proportional to user risk rather than architecture created only to validate itself;
 - tests and manual acceptance;
 - UI design fidelity when applicable;
 - whether the proposal creates duplicate/parallel sources of truth.
@@ -251,7 +213,7 @@ Use `references/review-checklists.md`.
 
 ## Final regression and checkpoint policy
 
-At the end of a Phase, prefer an independent new Codex session, normally Sol High/Extra High, for REVIEW ONLY.
+At the end of a Phase, prefer an independent new Codex session, normally Sol High, for REVIEW ONLY; use Extra High only when Phase risk/uncertainty is unusually high.
 
 Review the diff from the previous stable checkpoint to the current working tree. Separate:
 
@@ -274,15 +236,10 @@ Only after final manual PASS may the checkpoint prompt authorize:
 
 Be direct and operational. For a nontechnical user:
 
-- answer in the user's language;
-- explain product impact before code/architecture detail;
 - explain why the next step matters in plain language;
 - provide one recommended next action rather than many competing paths;
-- if there are multiple technical options, recommend one instead of delegating low-level architecture choice to the user;
-- give copyable Codex prompts in the same language as the user;
-- require Codex reports to use that language too;
+- give copyable Codex prompts when the workflow reaches a Codex handoff;
 - keep implementation jargon behind concise explanations;
-- add a short non-technical summary when a decision is architecture-heavy;
 - do not force the user to remember stage names.
 
 ## Resource map
@@ -290,7 +247,6 @@ Be direct and operational. For a nontechnical user:
 Load only what is needed:
 
 - Full workflow/state machine: `references/workflow.md`
-- Simplicity, language, and non-technical-user policy: `references/simplicity-and-language.md`
 - Codex prompt templates: `references/codex-prompts.md`
 - Dynamic model choice: `references/model-selection.md`
 - UI/UX + ui-ux-pro-max integration: `references/ui-ux-integration.md`
@@ -298,3 +254,5 @@ Load only what is needed:
 - ChatGPT Project usage and chat organization: `references/project-usage.md`
 - GitHub stable-vs-working-tree rules: `references/github-usage.md`
 - Detailed installation/user guide: `references/user-guide.md`
+- Codex token/credit efficiency, AGENTS.md, compact prompts, cache-friendly workflow: `references/token-efficiency.md`
+- Repository structure policy for new projects, major subsystem additions, or proposed restructures: `references/repository-structure.md`

@@ -12,6 +12,7 @@
 8. Final Verification readiness
 9. Delta Verification scope
 10. Checkpoint readiness
+11. Token/efficiency sanity check
 
 
 ## 1. `/plan` review
@@ -22,38 +23,24 @@ Check:
 - Does it create a second source of truth or duplicate tree/state/model?
 - Is the scope bounded to the Round?
 - Are non-goals respected?
-- Is the plan solving a current accepted requirement, or a hypothetical future problem?
-- What is the minimum viable design that could satisfy the user goal?
-- What is the worst realistic consequence of using that simpler design?
-- Does the consequence justify added migrations, state machines, schedulers, retry engines, global revision tracking, reconciliation layers, or broad cross-module changes?
 - Are migrations/data changes really necessary?
 - Is backward compatibility addressed?
 - Are atomicity/rollback/idempotency/orphan risks addressed when persistent data changes?
-- Are tests proportional to real user risk, rather than primarily validating architecture introduced by the plan itself?
+- Are tests proportional to the change?
 - Is manual acceptance testable?
-- For a non-technical user: can the recommendation be explained in plain language, and is one option clearly recommended?
 - For UI: does the plan follow the approved Master/UI spec without inventing a new direction?
 
 Verdict: `PASS` or `REVISE`.
 
-A plan may be `REVISE` even when technically correct if its complexity is disproportionate to the V1 consequence being avoided.
-
 ## 2. `/goal` review
 
-Before giving `/goal` to Codex, verify it contains:
-- approved goal;
-- approved plan;
-- review guardrails;
-- scope/non-goals;
-- acceptance criteria;
-- regression protections;
-- smallest-sufficient-solution guardrail;
-- prohibition on speculative future-proof infrastructure;
-- the user's language requirement and Codex response-language requirement;
-- plain-language summary requirement for non-technical users;
-- verification commands/expectations;
-- explicit no commit/tag/push before acceptance;
-- stop condition for manual QA.
+Before giving `/goal` to Codex, verify:
+- it references the approved plan from the same session instead of restating it;
+- only review deltas/critical guardrails are repeated;
+- verification is proportionate to Round risk;
+- explicit no commit/tag/push before acceptance is present when applicable;
+- stop condition for manual QA is clear;
+- if the plan session was lost, only a compact approved-plan summary is included.
 
 For UI Rounds also include:
 - Master/page spec source of truth;
@@ -69,9 +56,7 @@ Check evidence for:
 - build/smoke status;
 - migrations/schema/data changes;
 - known limitations;
-- unexpected extra scope;
-- complexity that materially exceeds the approved plan;
-- new infrastructure whose value is not tied to an accepted requirement.
+- unexpected extra scope.
 
 Do not equate "Codex says done" with acceptance.
 
@@ -182,3 +167,15 @@ Checkpoint completion requires:
 - push tag;
 - remote verification;
 - clean local working tree.
+
+## 11. Token/efficiency sanity check
+
+Before asking for another Codex call, review, or test cycle, ask:
+- Will this produce new evidence or only repeat already-fresh PASS evidence?
+- Can stable context be referenced from `AGENTS.md`/project docs instead of pasted again?
+- Can the prompt carry a delta instead of the full previous plan/report?
+- Is the selected model/effort the cheapest safe choice for the actual risk?
+- Can focused tests answer the question before a full suite?
+- Is an independent reviewer actually justified by risk?
+
+Never skip data-safety, migration, recovery, security, or required acceptance checks merely to save tokens.
