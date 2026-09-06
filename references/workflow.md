@@ -25,6 +25,8 @@
 21. Final Delta Verification vs full re-review
 22. Checkpoint
 23. Next Phase
+24. Current Phase / Round Ledger
+25. Session Boundary and Handoff
 
 
 ## 1. Top-level flow
@@ -41,6 +43,8 @@ FREEZE SPEC
 PHASE PLANNING
  ↓
 ROUND PLANNING
+ ↓
+UPDATE CURRENT PHASE / ROUND LEDGER
  ↓
 UI DESIGN GATE? ── no ──────────────┐
  ↓ yes                               │
@@ -300,6 +304,8 @@ A Round is accepted only when:
 - visual QA passes for UI Rounds;
 - no known blocker remains.
 
+After acceptance, update the active Round ledger (`docs/CURRENT_PHASE.md` when present): mark the Round `ROUND_ACCEPTED`, preserve the uncommitted/checkpoint status accurately, and identify exactly one next action. This is progress-state maintenance, not a stable checkpoint.
+
 Do not automatically commit/tag after every Round unless the project explicitly uses per-Round checkpoints.
 
 ## 18. Final Regression Review
@@ -376,12 +382,76 @@ Rerun broader Final Regression Review when the fix changes:
 
 Checkpoint only after final manual PASS.
 
+Checkpoint history and active-state tracking are different: `CHECKPOINTS.md` records stable accepted checkpoints; `docs/CURRENT_PHASE.md` records where ongoing work currently stands. Do not turn checkpoint history into a per-Round progress log.
+
 Expected sequence:
 
 `tests -> build -> smoke -> docs -> commit -> tag -> push branch -> push tag -> verify remote -> clean working tree`
+
+After checkpoint completion, update the active state ledger to reflect the stable checkpoint and the next user-approved boundary.
 
 If verification fails, stop before declaring checkpoint complete.
 
 ## 23. Next Phase
 
 Only begin after the stable remote checkpoint exists and the user asks to continue.
+
+
+## 24. Current Phase / Round Ledger
+
+Use a compact project-state ledger when the project spans multiple Rounds or the user may reasonably lose track of progress. Prefer `docs/CURRENT_PHASE.md` when the repository adopts this convention.
+
+The ledger answers only:
+- current Phase;
+- planned Rounds and their current status;
+- current Round;
+- workflow state (for example `FROZEN`, `READY_FOR_PLAN`, `PLAN_PASS`, `IMPLEMENTED`, `ROUND_ACCEPTED`);
+- selected model for the active Round when known;
+- previous stable checkpoint;
+- whether the current Phase work is still uncommitted/uncheckpointed;
+- exactly one next action.
+
+Keep detailed requirements in PRD/roadmap/UI/spec docs, not in the ledger. Keep stable historical releases/checkpoints in `CHECKPOINTS.md`, not in the ledger.
+
+Update the ledger at meaningful state transitions, especially:
+- Phase/Round structure frozen;
+- current Round frozen;
+- `/plan` ready or PASS;
+- implementation complete;
+- manual acceptance PASS;
+- Round accepted;
+- Phase ready for final review/checkpoint;
+- checkpoint completed.
+
+Do not commit merely to record a Round-state update when the project policy defers commits until the Phase checkpoint.
+
+## 25. Session Boundary and Handoff
+
+Default ChatGPT ownership: one active Round per conversation. A conversation may include brainstorm, critique, freeze, Codex prompt generation, plan review, implementation review, and manual QA for that Round.
+
+Recommend a fresh ChatGPT conversation when:
+- starting a new Round;
+- starting a new Phase;
+- the current conversation is materially confused or overloaded;
+- a deliberately independent review is needed.
+
+The user may continue in the current conversation; session boundaries are a reliability default, not a blocker.
+
+Codex remains stricter: one Round = one Codex session = one model, with `/plan` and `/goal` in the same session unless intentionally abandoned.
+
+Whenever recommending a new ChatGPT or Codex session, provide a compact handoff containing only:
+- project and Phase;
+- Round ledger summary;
+- current Round/state;
+- previous stable checkpoint / working-tree checkpoint status;
+- selected model when known;
+- exactly one next action;
+- critical do-not rules (for example no commit/tag/push, no next Phase).
+
+Access rule:
+- `docs/CURRENT_PHASE.md` is the local repository authority for Codex and any ChatGPT execution environment that can actually read that local file.
+- A normal new ChatGPT conversation must not assume it can read the user's local filesystem or claim it has read `docs/CURRENT_PHASE.md` when it has not.
+- When direct local access is unavailable, the Session Handoff is the transport representation of the latest active state for the new ChatGPT conversation.
+- If a fresh handoff conflicts with older GitHub `CURRENT_PHASE.md`, Codex/local evidence wins for uncommitted work. GitHub remains the stable checkpoint authority unless the user explicitly maintains an active-state branch.
+
+Use `assets/SESSION_HANDOFF.template.md` when a formal copyable handoff helps. Do not make the user reconstruct this handoff from earlier messages.
