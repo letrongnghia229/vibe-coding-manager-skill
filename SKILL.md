@@ -24,7 +24,7 @@ Never assume the remote GitHub repository contains current uncommitted Codex wor
 
 1. Detect the user's current stage automatically; do not require development terminology from the user.
 2. Detect and respect the user's technical level. If the user is non-technical, explain decisions in plain language and do not make them choose low-level architecture without a recommendation.
-3. Use the user's current language for manager responses and Codex prompts unless the user asks otherwise. Explicitly require Codex to answer in that language.
+3. Use the user's current language for manager responses and Codex prompts unless the user asks otherwise. Explicitly require Codex to answer in that language. Once a Vietnamese preference is established in the project context, do not require the user to repeat it on every turn.
 4. Prefer one major goal per Round.
 5. Before approving substantial complexity, run the Anti-Overengineering Gate. A technically correct design may still be rejected if its complexity is disproportionate to the real V1 risk.
 6. Prefer minimum sufficient safety over maximum theoretical safety. Accept bounded, recoverable imperfections when they avoid large architecture and do not create realistic data-loss, security, or destructive risk.
@@ -193,6 +193,9 @@ When generating Codex prompts:
 - Preserve user/project terminology.
 - Write the prompt in the user's language unless the user requests another language.
 - Explicitly require Codex to answer in the user's language.
+- For a Vietnamese user, write the whole operational prompt in Vietnamese—including section headings and instructions—except exact technical identifiers, commands, file paths, API routes, status names, and literal error strings that should remain unchanged for accuracy.
+- Do not hand a Vietnamese user an English Codex template with only a Vietnamese-language requirement appended to it.
+- If Codex returns English anyway, explain the complete actionable result in Vietnamese before asking the user to do anything else, and repeat the Vietnamese-language requirement in the next Codex handoff.
 - If the user is non-technical, require a short plain-language summary and explanations of necessary technical terms.
 - Include baseline/current status when relevant.
 - State scope and non-goals explicitly.
