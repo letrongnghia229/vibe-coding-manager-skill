@@ -40,6 +40,11 @@ Never assume the remote GitHub repository contains current uncommitted Codex wor
 16. Optimize Codex usage by default: avoid repeated context, repeated verification, unnecessary full-suite runs, and oversized reports; never trade away correctness or data safety.
 17. Prefer stable project instructions in a short repository `AGENTS.md`; prompts should carry only the current Round delta/evidence.
 18. Default to Vietnamese for user-facing guidance and Codex handoffs unless the user explicitly requests another language; preserve English technical terms when they are more precise.
+19. Maintain explicit project state: distinguish the active Phase/Round ledger from stable checkpoint history; use `docs/CURRENT_PHASE.md` when the repository adopts that convention.
+20. Default ChatGPT ownership to one active Round per conversation; when recommending a new Round/session, provide a compact session handoff instead of relying on the user to remember context.
+21. Before emitting any Codex `/plan` or `/goal`, run the Codex Prompt Preflight: remove redundant stable context, avoid broad documentation loading, and keep only the smallest sufficient current delta/evidence.
+22. Never enumerate all project documentation by default. High-risk work increases verification/review depth, not documentation breadth; broaden reading only when repository evidence creates a concrete need.
+23. Treat local `docs/CURRENT_PHASE.md` as authoritative only when ChatGPT actually has access to that file or to fresh evidence from Codex/local tooling. Never claim to have read an inaccessible local file. For a new ChatGPT conversation without direct local-repo access, use a compact Session Handoff as the transport copy of active state.
 
 ## Stage detector
 
@@ -97,7 +102,7 @@ Use `references/ui-ux-integration.md`.
 
 ### Plan gate
 
-`Codex /plan`-> ChatGPT review -> PASS or REVISE`
+`Codex /plan -> ChatGPT review -> PASS or REVISE`
 
 Only generate `/goal` when the plan is approved.
 
@@ -176,6 +181,9 @@ When generating Codex prompts:
 - Ask Codex to stop after the requested stage.
 - After `/plan` PASS in the same session, make `/goal` compact and do **not** repeat the approved plan; carry only review deltas/guardrails and verification/stop rules.
 - Ask for concise reports; do not request large diffs/logs or plan restatement when not needed.
+- If `docs/CURRENT_PHASE.md` exists, treat it as the compact authority for active Phase/Round state and next action; do not use it as a substitute for detailed specs.
+- Never list every PRD/roadmap/UI/checkpoint document in a Codex prompt merely because the Round is high-risk. Start with `AGENTS.md`, `docs/CURRENT_PHASE.md` when present, current worktree evidence, and targeted relevant docs/code.
+- Run a prompt preflight before handoff: remove repeated repository-stable rules, repeated approved-plan content, irrelevant docs, oversized verification, and unnecessary scope restatement.
 - For UI Rounds, reference the approved Master/UI spec and require no unauthorized visual redesign.
 
 Use templates from `references/codex-prompts.md`; adapt them to the project rather than copying irrelevant sections. For token/credit optimization, read `references/token-efficiency.md`.
@@ -207,7 +215,7 @@ Do not infer correctness from Codex's summary alone. Evaluate tests, evidence, s
 If actual behavior contradicts prior assumptions, first inspect/diagnose. Classify the gap as:
 
 - **INTENTIONAL SCOPE**
-- **DOCUMENTED DFEERRED**
+- **DOCUMENTED DEFERRED**
 - **IMPLEMENTATION GAP**
 
 An implementation gap against an accepted requirement blocks checkpoint readiness.
@@ -260,4 +268,7 @@ Load only what is needed:
 - GitHub stable-vs-working-tree rules: `references/github-usage.md`
 - Detailed installation/user guide: `references/user-guide.md`
 - Codex token/credit efficiency, AGENTS.md, compact prompts, cache-friendly workflow: `references/token-efficiency.md`
+- Current Phase/Round state convention and ChatGPT session ownership: `references/project-usage.md`
+- Repository current-state template: `assets/CURRENT_PHASE.template.md`
+- Cross-conversation state transport template: `assets/SESSION_HANDOFF.template.md`
 - Repository structure policy for new projects, major subsystem additions, or proposed restructures: `references/repository-structure.md`
