@@ -4,7 +4,7 @@
 
 1. Goal
 2. Stable project rules in `AGENTS.md`
-3. Three-layer context model
+3. Four-layer context model
 4. One Round = one session = one model
 5. `/goal` does not repeat `/plan`
 6. Compact `/plan`
@@ -21,6 +21,8 @@
 17. ChatGPT manager behavior
 18. Keep product decisions out of Codex when repo work is unnecessary
 19. Compact default handoff templates
+20. Current Phase state
+21. Codex Prompt Preflight
 
 ## Goal
 
@@ -52,13 +54,16 @@ Keep active Round status, temporary bugs, current acceptance evidence, and long 
 
 A good `AGENTS.md` should point to project docs instead of copying them.
 
-## 2. Use a three-layer context model
+## 2. Use a four-layer context model
 
 ```text
 AGENTS.md = stable repository rules
+docs/CURRENT_PHASE.md = compact active Phase/Round state, when present
 Project docs = detailed WHAT / architecture / specs
 Current prompt = only NOW / delta / evidence
 ```
+
+`CURRENT_PHASE.md` is an index of current workflow state, not another specification. Keep it short so a new session can orient itself without loading the PRD/roadmap/UI spec by default.
 
 Do not paste full PRDs, roadmaps, previous plans, or old reports into every Codex prompt when Codex can read the repository versions.
 
@@ -96,10 +101,10 @@ REVIEW DELTA / GUARDRAIL:
 VERIFICATION:
 - <focused tests phÃ¹ há»£p vá»›i Round>
 
-Pháº£n há»“i hoÃ n tÃ¬n báº±ng tiáº¿ng Viá»‡t; giá»¯ nguyÃªn thuáº­t ngá»¯ ká»¹ thuáº­t tiáº¿ng Anh khi chÃ­nh xÃ¡c hÆ¡n.
+Pháº£n há»“i hoÃ n toÃ n báº±ng tiáº¿ng Viá»‡t; giá»¯ nguyÃªn thuáº­t ngá»¯ ká»¹ thuáº­t tiáº¿ng Anh khi chÃ­nh xÃ¡c hÆ¡n.
 KhÃ´ng láº·p láº¡i plan.
 KhÃ´ng commit/tag/push.
-KhÃ´ng báº¿t Ä‘áº§u Round/Phase tiáº¿p theo.
+KhÃ´ng báº¯t Ä‘áº§u Round/Phase tiáº¿p theo.
 ```
 
 Repeat plan details only if:
@@ -117,7 +122,7 @@ A normal `/plan` usually needs only:
 - Round name;
 - one-sentence context;
 - current problem/goal;
-- scope/non-goals that are not already in `AGENTS.md`/docs:
+- scope/non-goals that are not already in `AGENTS.md`/docs;
 - acceptance criteria;
 - relevant evidence;
 - explicit PLAN ONLY stop rule.
@@ -136,6 +141,12 @@ Prefer:
 before broad repository-wide reading.
 
 Expand only when evidence indicates the issue spans more areas.
+
+### High-risk context rule
+
+High risk changes verification depth, review rigor, and safety checks; it does **not** automatically justify broad documentation loading. A recovery/migration/security Round should still begin with the smallest relevant state/code/docs and expand only for a concrete uncertainty.
+
+Never enumerate all project docs by default merely to make Codex "understand the project".
 
 ## 7. Use progressive verification
 
@@ -253,7 +264,7 @@ Usage depends on model, reasoning effort, context, task complexity, tools, and r
 
 ## 16. ChatGPT manager behavior
 
-When generating Codex handoffs':
+When generating Codex handoffs:
 
 - do not paste known project rules already present in `AGENTS.md` unless they are critical to the immediate risk;
 - reference relevant docs by path;
@@ -261,6 +272,7 @@ When generating Codex handoffs':
 - avoid redundant verification suggestions after PASS with no code delta;
 - give the user one next action;
 - default to Vietnamese for user-facing guidance and Codex handoffs unless the user explicitly requests another language; preserve precise English technical terms when translation would reduce accuracy.
+
 
 ## 17. Keep product decisions with ChatGPT/user when repo work is unnecessary
 
@@ -281,14 +293,72 @@ Do not spend a high-cost Codex session debating product options that should be f
 
 Äá»c AGENTS.md vÃ  chá»‰ cÃ¡c project docs liÃªn quan.
 
-Má»¥C TIÃŠU:
+Má»¤C TIÃŠU:
 <má»™t má»¥c tiÃªu ngáº¯n gá»n>
 
 EVIDENCE / CURRENT GAP:
-<chá»ˆ evidence hiá»‡n táº¡i>
+<chá»‰ evidence hiá»‡n táº¡i>
 
 ACCEPTANCE:
 1. ...
 2. ...
 
-PLAN ONLY. Inspect pháº¡m vi nhá» †ê•Ğ±§©¸ÅÕ…¸ÑËÃ†îmŒ¸)-£Ñ¹œÏ†îµ„™¥±”¸-£Ñ¹œ½µµ¥Ğ½Ñ…œ½ÁÕÍ ¸†î­¹œƒG†îÉ•Ù¥•Ü¸)A£†ê¸£†îM¤¡¿¸Ñ¿¸‹†êÅ¹œÑ§†êı¹œY§†îĞÑ¡•¼9QL¹µì§†î¼¹Õç©¸Ñ¡×†êµĞ¹Ÿ†î¼¯†îäÑ¡×†êµĞÑ§†êı¹œ¹ ­¡¤†ê¸ƒG†î£µ¹ ã…Œ¸)€((ŒŒŒ€½½…±€()Ñ•áĞ(½½…°()mS)8I=U9t()QÉ§†î¸­¡…¤…ÁÁÉ½Ù•Á±…¸Ó†î¬£µ¹ Í•ÍÍ¥½¸»ä¸()IY%\1Q€¼UII%0è(´€ñ£†î$½¹ÍÑÉ…¥¹Ğ·†îm¤Ó†î¬Á±…¸É•Ù¥•Ü°»†êıÔÌø()£†ê…ä™½ÕÍ•€¬‘¥É•Ñ±äÉ•±•Ù…¹ĞÉ•É•ÍÍ¥½¸Ñ•ÍÑÌì£†î$·†î|Ë†îe¹œ­¡¤É¥Í¬ç©Ô†êÔ¸)…¼…¼¹Ÿ†ê½¸Ÿ†î5¸°­£Ñ¹œ³†êİÀ³†ê…¤Á±…¸¸()-£Ñ¹œ½µµ¥Ğ½Ñ…œ½ÁÕÍ ¸-£Ñ¹œ‹†ê½ĞƒG†êÔI½Õ¹½A¡…Í”Ñ§†êıÀÑ¡•¼¸)A£†ê¸£†îM¤¡¿¸Ó±¸Ñ¿¸‹†êÅ¹œÑ§†êı¹œY§†îĞÑ¡•¼9QL¹µì§†î¼¹Õç©¸Ñ¡×†êµĞ¹Ÿ†î¼¯†îäÑ¡×†êµĞÑ§†êı¹œ¹ ­¡¤†ê·G†î£µ¹ ã…Œ¸)€((ŒŒŒ%µÁ±•µ•¹Ñ…Ñ¥½¸É•Á½ÉĞÉ•ÅÕ•ÍĞ()Ñ•áĞ)£†î$‹…¼…¼è(Ä¸™¥±•Ì¡…¹•ì(È¸‰•¡…Ù¥½È¡…¹•ì(Ì¸•á…ĞÑ•ÍÑÌ½‰Õ¥±‘ÌÛ€AML½%0ì(Ğ¸‘•Ù¥…Ñ¥½¹Ì½‰±½­•ÉÌ½­¹½İ¸É¥Í­Ìì(Ô¸µ…¹Õ…°EÍÑ•ÁÌ¸)-£Ñ¹œ³†êİÀ³†ê…¤Á±…¸¡¿›1ŒÁ…ÍÑ”‘¥™˜½±½œ“¤¸)A£†ê¸£†îM¤¡¿¸Ó±¸Ñ¿¸‹†êÅ¹œÑ§†êı¹œY§†îĞì§†î¼¹Õç©¸Ñ¡×†êµĞ¹Ÿ†î¼¯†îäÑ¡×†êµĞÑ§†êı¹œ¹ ­¡¤†ê·G†î£µ¹ ã…Œ¸)€
+PLAN ONLY. Inspect pháº¡m vi nhá» nháº¥t liÃªn quan trÆ°á»›c.
+KhÃ´ng sá»­a file. KhÃ´ng commit/tag/push. Dá»«ng Ä‘á»ƒ review.
+Pháº£n há»“i hoÃ n toÃ n báº±ng tiáº¿ng Viá»‡t theo AGENTS.md; giá»¯ nguyÃªn thuáº­t ngá»¯ ká»¹ thuáº­t tiáº¿ng Anh khi cáº§n Ä‘á»ƒ chÃ­nh xÃ¡c.
+```
+
+### `/goal`
+
+```text
+/goal
+
+[TÃŠN ROUND]
+
+Triá»ƒn khai approved plan tá»« chÃ­nh session nÃ y.
+
+REVIEW DELTA / GUARDRAIL:
+- <chá»‰ constraint má»›i tá»« plan review, náº¿u cÃ³>
+
+Cháº¡y focused + directly relevant regression tests; chá»‰ má»Ÿ rá»™ng khi risk yÃªu cáº§u.
+BÃ¡o cÃ¡o ngáº¯n gá»n, khÃ´ng láº·p láº¡i plan.
+
+KhÃ´ng commit/tag/push. KhÃ´ng báº¯t Ä‘áº§u Round/Phase tiáº¿p theo.
+Pháº£n há»“i hoÃ n toÃ n báº±ng tiáº¿ng Viá»‡t theo AGENTS.md; giá»¯ nguyÃªn thuáº­t ngá»¯ ká»¹ thuáº­t tiáº¿ng Anh khi cáº§n Ä‘á»ƒ chÃ­nh xÃ¡c.
+```
+
+### Implementation report request
+
+```text
+Chá»‰ bÃ¡o cÃ¡o:
+1. files changed;
+2. behavior changed;
+3. exact tests/builds vÃ  PASS/FAIL;
+4. deviations/blockers/known risks;
+5. manual QA steps.
+KhÃ´ng láº·p láº¡i plan hoáº·c paste diff/log dÃ i.
+Pháº£n há»“i hoÃ n toÃ n báº±ng tiáº¿ng Viá»‡t; giá»¯ nguyÃªn thuáº­t ngá»¯ ká»¹ thuáº­t tiáº¿ng Anh khi cáº§n Ä‘á»ƒ chÃ­nh xÃ¡c.
+```
+
+
+## 20. Current Phase state
+
+For multi-Round projects, prefer a tiny `docs/CURRENT_PHASE.md` that records active Phase/Round state, previous stable checkpoint, working-tree checkpoint status, model, and one next action.
+
+Use it to orient new ChatGPT/Codex sessions cheaply. Do not duplicate detailed Round requirements or checkpoint history there.
+
+When a Round is accepted, update current state without pretending a stable checkpoint exists. Update `CHECKPOINTS.md` only at the project's real stable checkpoint gate.
+
+## 21. Codex Prompt Preflight
+
+Before emitting a Codex handoff, remove anything Codex already has from `AGENTS.md`, `CURRENT_PHASE.md`, the current session, or the approved plan.
+
+Check especially for:
+- an unnecessary list of all project docs;
+- repeated stable repository rules;
+- repeated approved-plan text in `/goal`;
+- broad inspection without evidence;
+- full-suite verification where focused tests are sufficient;
+- oversized reports.
+
+The prompt should contain the smallest sufficient NOW/delta/evidence plus the required stop/safety rules.
