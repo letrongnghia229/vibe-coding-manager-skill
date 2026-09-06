@@ -9,13 +9,17 @@
 5. Codex sessions
 6. Context/token-efficient handoff
 7. Daily prompt shape
+8. Current Phase state file
+9. Session handoff
 
 ## Mental model
 
 - **Project = WHAT**
 - **Skill = HOW**
 - **AGENTS.md = stable Codex repository rules**
-- **Prompt = NOW**
+- **docs/CURRENT_PHASE.md = WHERE NOW in the local repository (active Phase/Round state, when used)**
+- **Session Handoff = transport of WHERE NOW into a new ChatGPT conversation when local repo access is unavailable**
+- **Prompt = NOW / immediate delta**
 
 ## What belongs in the ChatGPT Project
 
@@ -66,17 +70,17 @@ Use for:
 - future ideas;
 - cross-Phase decisions.
 
-### Phase chat
+### Round chat
 
-A practical default is one main ChatGPT chat per Phase. It can cover several Rounds unless context becomes confusing or too large.
+Default to one active Round per ChatGPT conversation. Keep brainstorm, critique, freeze, Codex prompt generation, plan review, implementation review, and manual QA for that Round together.
 
 Open a fresh ChatGPT chat when:
+- starting a new Round;
+- starting a new Phase;
 - the current chat is very long/confused;
-- the Round is architecturally distinct;
-- an independent reviewer perspective is desired;
-- a clean Phase boundary is reached.
+- an independent reviewer perspective is desired.
 
-Do not open a new ChatGPT chat solely to save Codex context; Codex session boundaries matter more for Codex usage.
+This is a reliability default, not a hard blocker: the user may continue in the same conversation when convenient. Do not make the user reconstruct context manually; provide a compact session handoff at the boundary.
 
 ### Codex sessions
 
@@ -137,3 +141,50 @@ What do I need ChatGPT to do next?
 ```
 
 The skill should infer the stage and generate the smallest sufficient next action.
+
+
+## 8. Current Phase state file
+
+For projects with multiple Rounds, prefer `docs/CURRENT_PHASE.md` as a short mutable state index.
+
+It should contain:
+- current Phase;
+- previous stable checkpoint;
+- Round ledger (`PLANNED`, `FROZEN`, `READY_FOR_PLAN`, `PLAN_PASS`, `IMPLEMENTED`, `ROUND_ACCEPTED`, or an equivalent small vocabulary);
+- current Round and state;
+- selected model when known;
+- whether current work is uncommitted/uncheckpointed;
+- exactly one next action.
+
+It should not contain full requirements, long implementation reports, or checkpoint history. Those remain in project specs/roadmap and `CHECKPOINTS.md`.
+
+Use `assets/CURRENT_PHASE.template.md` as the starting structure.
+
+## 9. Session handoff
+
+`docs/CURRENT_PHASE.md` does not magically synchronize into ChatGPT. Distinguish access explicitly:
+
+- Codex working in the local repo can read local `docs/CURRENT_PHASE.md` directly.
+- ChatGPT may use it directly only when the file is uploaded, available through an accessible connector/runtime, or otherwise actually readable in the current conversation.
+- A new ChatGPT conversation without local-repo access should receive a Session Handoff. Never claim that ChatGPT read the local file when it did not.
+
+Whenever recommending a fresh ChatGPT or Codex session, include a compact handoff so a non-technical user does not need to remember project state. The handoff should normally be generated from the freshest available local/Codex evidence and should mirror, not replace, `CURRENT_PHASE.md`.
+
+Template:
+
+```text
+SESSION HANDOFF
+Project: <name>
+Phase: <phase>
+Previous stable checkpoint: <checkpoint>
+Rounds: <compact status list>
+Current: <round + workflow state>
+Working tree: <checkpointed/uncommitted fact>
+Model: <when known>
+Known pending evidence: <only material unresolved item, if any>
+Next: <exactly one action>
+Do not: <critical safety/next-phase rules>
+Local authority: docs/CURRENT_PHASE.md
+```
+
+Use `assets/SESSION_HANDOFF.template.md` when a copyable artifact is useful. Do not paste old conversation transcripts or full specs into the handoff.
