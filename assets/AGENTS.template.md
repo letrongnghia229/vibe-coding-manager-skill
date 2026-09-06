@@ -15,7 +15,9 @@
 Do not reorganize the repository without a concrete approved need.
 
 ## Sources of truth
-Read only when relevant:
+- If present, read `docs/CURRENT_PHASE.md` for the active Phase/Round and next action.
+- Read detailed project docs only when they are directly relevant to the current task.
+- Never enumerate/read all PRD/roadmap/UI/checkpoint docs by default.
 - `<project docs>`
 
 The current local working tree may be newer than the stable remote. Do not discard uncommitted work merely to match the remote.
@@ -38,6 +40,7 @@ The current local working tree may be newer than the stable remote. Do not disca
 
 ## Token / credit efficiency
 - Inspect narrowly first (`git diff`, `git status`, targeted search/files).
+- High-risk work increases verification/review depth, not default documentation breadth.
 - Reference docs by path instead of repeating them.
 - Run focused tests first; broaden only at the appropriate risk/gate.
 - Do not repeat verification after manual PASS when no code changed.
