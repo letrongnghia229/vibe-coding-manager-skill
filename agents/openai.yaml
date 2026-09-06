@@ -1,7 +1,7 @@
 interface:
   display_name: Vibe Coding Manager
-  short_description: Orchestrates Codex rounds, UI gates, QA, regression reviews,
-    and checkpoints.
+  short_description: Manages Codex rounds with plain-language guidance, simplicity gates, QA,
+    regression reviews, and checkpoints.
   icon_small: assets/icon.svg
   icon_large: assets/icon.svg
 policy:

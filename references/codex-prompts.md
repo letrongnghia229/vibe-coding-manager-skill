@@ -2,6 +2,7 @@
 
 ## Table of contents
 
+0. Shared language and simplicity block
 1. Normal Round `/plan`
 2. Normal Round `/goal`
 3. UI Round `/plan`
@@ -18,7 +19,35 @@
 
 Use these as adaptable templates. Keep only the sections relevant to the current project/task.
 
+## 0. Shared language and simplicity block
+
+For a non-technical user, prepend or include this block in every substantial Codex prompt. Replace `<USER_LANGUAGE>` with the user's current language.
+
+```text
+LANGUAGE / USER LEVEL:
+- Respond entirely in <USER_LANGUAGE>.
+- The user does not have a software-development background.
+- Explain important technical terms briefly in plain language.
+- Focus on what a mechanism does and why it is necessary.
+- Keep file names, function names, class names, API names, states, and code identifiers unchanged.
+
+SIMPLICITY POLICY:
+- Prefer the smallest stable solution that satisfies the accepted current requirement.
+- Do not add future-proof infrastructure for hypothetical future needs.
+- Do not introduce a scheduler, global state machine, exact-once machinery, global revision tracking, reconciliation layers, or new migrations unless the current requirement genuinely needs them.
+- If the implementation becomes materially more complex than the user-visible goal suggests, STOP and explain why a simpler solution is insufficient before proceeding.
+- A rare, recoverable, non-destructive imperfection is acceptable when avoiding it would require disproportionate architecture.
+
+At the end, add a short section titled:
+PLAIN-LANGUAGE SUMMARY FOR A NON-TECHNICAL USER
+Explain in at most 10 lines what is proposed/done, why it is needed, the realistic remaining risk, and the user's next action.
+```
+
+When the user's language is Vietnamese, translate the block itself into Vietnamese in the generated prompt. Do not leave the operational prompt in English unless the user requested English.
+
 ## 1. Normal Round `/plan`
+
+Include the Shared language and simplicity block when the user is non-technical.
 
 ```text
 /plan
@@ -51,11 +80,14 @@ PLAN ONLY.
 Return:
 1. Root cause.
 2. Relevant data/state/control flow.
-3. Files/components/functions expected to change.
-4. Migration/backward-compatibility implications.
-5. Regression risks.
-6. Tests to add/run.
-7. Smallest safe implementation plan.
+3. Smallest viable solution.
+4. Why any proposed new architecture/state/migration is actually necessary.
+5. Worst realistic consequence of choosing the simpler solution.
+6. Files/components/functions expected to change.
+7. Migration/backward-compatibility implications.
+8. Regression risks.
+9. Tests to add/run.
+10. Smallest safe implementation plan.
 
 DO NOT modify files.
 DO NOT commit/tag/push.
@@ -64,6 +96,8 @@ Stop after the plan for review.
 ```
 
 ## 2. Normal Round `/goal`
+
+Include the Shared language and simplicity block when the user is non-technical.
 
 Generate this only after the plan is approved.
 
@@ -96,7 +130,9 @@ REQUIRED BEHAVIOR / ACCEPTANCE:
 REGRESSION PROTECTION:
 - preserve previously accepted behavior;
 - preserve project-specific data/state/safety constraints;
-- do not refactor unrelated stable code.
+- do not refactor unrelated stable code;
+- do not reintroduce complexity that the approved plan intentionally avoided;
+- if implementation reality requires materially broader architecture, STOP and report instead of improvising.
 
 TESTS / VERIFICATION:
 - focused tests;
@@ -160,6 +196,8 @@ UI IMPLEMENTATION RULES:
 
 ## 5. Diagnose-only
 
+Include the Shared language and simplicity block when the user is non-technical.
+
 ```text
 DIAGNOSE ONLY.
 
@@ -195,6 +233,8 @@ Stop before editing.
 
 ## 6. Manual Smoke Inspection
 
+Include the Shared language and simplicity block when the user is non-technical.
+
 Use when the manual test reveals a discrepancy and it is unclear whether the feature is missing, deferred, or intentionally out of scope.
 
 ```text
@@ -227,6 +267,8 @@ Do not commit/tag/push.
 ```
 
 ## 7. Confirmed Fix Round `/plan`
+
+Include the Shared language and simplicity block when the user is non-technical.
 
 ```text
 /plan
@@ -264,6 +306,8 @@ Stop for review before `/goal`.
 
 ## 8. Confirmed Fix Round `/goal`
 
+Include the Shared language and simplicity block when the user is non-technical.
+
 ```text
 /goal
 
@@ -290,6 +334,8 @@ Stop for manual retest of the failed acceptance step.
 ```
 
 ## 9. Final Regression Review `/plan`
+
+Include the Shared language and simplicity block when the user is non-technical.
 
 ```text
 /plan
@@ -339,6 +385,8 @@ E. Verdict:
 
 ## 10. Final Verification `/goal`
 
+Include the Shared language and simplicity block when the user is non-technical.
+
 Use only after Final Regression Review has no blocker.
 
 ```text
@@ -365,6 +413,8 @@ Report exact PASS/FAIL evidence and then STOP for final manual smoke.
 
 ## 11. Final Delta Verification
 
+Include the Shared language and simplicity block when the user is non-technical.
+
 Use after a narrow post-review fix.
 
 ```text
@@ -388,6 +438,8 @@ Do not commit/tag/push.
 ```
 
 ## 12. Checkpoint
+
+Include the Shared language and simplicity block when the user is non-technical.
 
 ```text
 FINAL MANUAL ACCEPTANCE: PASS

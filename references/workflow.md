@@ -8,23 +8,24 @@
 4. Freeze spec
 5. Phase planning
 6. Round planning
-7. UI Design Gate
-8. Model selection
-9. `/plan`
-10. Plan review
-11. `/goal`
-12. Implementation review
-13. Manual QA
-14. Visual QA
-15. Diagnose / inspection
-16. Fix Round
-17. Round accepted
-18. Final Regression Review
-19. Final Verification
-20. Final Manual Smoke
-21. Final Delta Verification vs full re-review
-22. Checkpoint
-23. Next Phase
+7. Product Simplicity Gate
+8. UI Design Gate
+9. Model selection
+10. `/plan`
+11. Plan review
+12. `/goal`
+13. Implementation review
+14. Manual QA
+15. Visual QA
+16. Diagnose / inspection
+17. Fix Round
+18. Round accepted
+19. Final Regression Review
+20. Final Verification
+21. Final Manual Smoke
+22. Final Delta Verification vs full re-review
+23. Checkpoint
+24. Next Phase
 
 
 ## 1. Top-level flow
@@ -41,6 +42,10 @@ FREEZE SPEC
 PHASE PLANNING
  ↓
 ROUND PLANNING
+ ↓
+PRODUCT SIMPLICITY GATE?
+ ├─ complexity proportionate → continue
+ └─ overengineered → simplify / user decision
  ↓
 UI DESIGN GATE? ── no ──────────────┐
  ↓ yes                               │
@@ -161,7 +166,34 @@ Good Round properties:
 
 Avoid combining unrelated backend/data/UI refactors into one Round.
 
-## 7. UI Design Gate
+## 7. Product Simplicity Gate
+
+Run this gate when a feature begins to require substantial architecture relative to the user-visible goal. Typical signals include:
+
+- a new global state machine or scheduler;
+- exact-once/distributed-style coordination;
+- canonical revision tracking across many tables;
+- orchestration-focused migrations;
+- retry generations/fingerprints/attempt identities;
+- broad cross-module changes for a narrow feature;
+- large crash-state test matrices whose avoided consequence is minor;
+- future cloud/LAN abstractions in a local-first V1.
+
+Ask:
+
+1. What is the user's actual V1 goal?
+2. What is the minimum viable design?
+3. What is the worst realistic outcome if we use the simpler design?
+4. Does that outcome involve likely data loss, corruption, secret exposure, irreversible damage, or a core accepted requirement?
+5. Is the extra complexity worth the code/test/maintenance cost?
+
+If the simpler design's downside is rare, recoverable, and non-destructive, prefer it.
+
+If advanced complexity is still proposed mainly to eliminate such an edge case, stop and obtain explicit user approval before `/goal`.
+
+Use the compact Product Simplicity Review format from `simplicity-and-language.md`.
+
+## 8. UI Design Gate
 
 Trigger for meaningful changes to:
 - new pages/screens;
@@ -180,11 +212,11 @@ Flow:
 
 If there is no approved Master, create a design-system direction first. If the app already exists with developer-looking UI, follow the retrofit path in `ui-ux-integration.md`.
 
-## 8. Model selection
+## 9. Model selection
 
 Select one model for the full Round before opening the Codex session. See `model-selection.md`.
 
-## 9. `/plan`
+## 10. `/plan`
 
 For non-trivial work, `/plan` is the repository-inspection stage.
 
@@ -199,7 +231,7 @@ The prompt should request:
 
 Require PLAN ONLY, no edits/commit/tag/push.
 
-## 10. Plan review
+## 11. Plan review
 
 Return:
 - `PASS`, or
@@ -207,7 +239,9 @@ Return:
 
 Do not generate `/goal` on a plan that still has unresolved root-cause, scope, or data-safety problems.
 
-## 11. `/goal`
+Also reject disproportionate complexity. A plan can be technically correct but still receive `REVISE` if it adds machinery whose main benefit is eliminating a rare, recoverable, non-destructive edge case. When that happens, return to the Product Simplicity Gate rather than iterating endlessly on the complex architecture.
+
+## 12. `/goal`
 
 Generate `/goal` only after plan approval.
 
@@ -223,7 +257,7 @@ Generate `/goal` only after plan approval.
 
 Use the same Codex session/model as `/plan` unless the original session is intentionally abandoned.
 
-## 12. Implementation review
+## 13. Implementation review
 
 When Codex reports completion:
 - inspect what changed conceptually;
@@ -231,7 +265,7 @@ When Codex reports completion:
 - identify manual acceptance steps;
 - do not treat Codex self-report as user acceptance.
 
-## 13. Manual QA
+## 14. Manual QA
 
 Give the user a short, concrete checklist focused on observable behavior. Prefer 3–10 steps for a Round.
 
@@ -246,7 +280,7 @@ Track acceptance state:
 - READY_FOR_CHECKPOINT
 - CHECKPOINTED
 
-## 14. Visual QA
+## 15. Visual QA
 
 For UI Rounds, manual QA is not enough. Also inspect screenshots or rendered states for:
 - hierarchy;
@@ -263,7 +297,7 @@ For UI Rounds, manual QA is not enough. Also inspect screenshots or rendered sta
 
 Compare against the approved Master/UI spec rather than subjective "make it prettier" criteria.
 
-## 15. Diagnose / inspection
+## 16. Diagnose / inspection
 
 Use when the root cause is unknown or evidence contradicts assumptions.
 
@@ -279,7 +313,7 @@ For manual-smoke discrepancies, classify:
 
 A backend/API workaround may prove a capability exists, but it does not satisfy a missing user-facing requirement if the spec requires UI exposure.
 
-## 16. Fix Round
+## 17. Fix Round
 
 When a blocker is confirmed, prefer a fresh focused Codex session rather than continuing a review-only session.
 
@@ -287,7 +321,7 @@ Typical default: Terra Extra High.
 
 Use `/plan` first if the fix has meaningful uncertainty; then review; then `/goal`.
 
-## 17. Round accepted
+## 18. Round accepted
 
 A Round is accepted only when:
 - required automated verification passes;
@@ -297,7 +331,7 @@ A Round is accepted only when:
 
 Do not automatically commit/tag after every Round unless the project explicitly uses per-Round checkpoints.
 
-## 18. Final Regression Review
+## 19. Final Regression Review
 
 Trigger after all planned Rounds of a Phase are accepted.
 
@@ -323,7 +357,7 @@ Verdict:
 - `READY FOR FINAL VERIFICATION`, or
 - `MUST FIX BEFORE CHECKPOINT`.
 
-## 19. Final Verification
+## 20. Final Verification
 
 Run a comprehensive but proportionate verification set:
 - backend/frontend tests as relevant;
@@ -335,7 +369,7 @@ Run a comprehensive but proportionate verification set:
 
 Do not commit/tag yet if final manual smoke is still pending.
 
-## 20. Final Manual Smoke
+## 21. Final Manual Smoke
 
 Use a short 5–12 step list of the highest-value workflows and high-risk regressions.
 
@@ -347,7 +381,7 @@ If a step fails:
 5. retest the failed step;
 6. resume remaining smoke steps where safe.
 
-## 21. Final Delta Verification vs full re-review
+## 22. Final Delta Verification vs full re-review
 
 After a post-review fix:
 
@@ -367,7 +401,7 @@ Rerun broader Final Regression Review when the fix changes:
 - security/auth;
 - broad cross-module architecture.
 
-## 22. Checkpoint
+## 23. Checkpoint
 
 Checkpoint only after final manual PASS.
 
@@ -377,6 +411,6 @@ Expected sequence:
 
 If verification fails, stop before declaring checkpoint complete.
 
-## 23. Next Phase
+## 24. Next Phase
 
 Only begin after the stable remote checkpoint exists and the user asks to continue.

@@ -1,6 +1,6 @@
 ---
 name: vibe-coding-manager
-description: Orchestrate end-to-end vibe coding workflows with Codex for software projects. Use when the user is brainstorming or critiquing a product idea, freezing specs, splitting work into phases or rounds, choosing a Codex model, generating or reviewing /plan and /goal prompts, diagnosing bugs, performing manual or visual QA, running final regression review, preparing checkpoints, or asking what to do next. Also coordinate UI Design Gates and Visual QA, optionally with ui-ux-pro-max, while keeping ChatGPT as manager/reviewer, Codex as executor, and the user as the final acceptance gate.
+description: Orchestrate end-to-end vibe coding workflows with Codex for software projects, especially for non-technical users who need plain-language guidance and protection against overengineering. Use when brainstorming or critiquing product ideas, freezing specs, splitting phases/rounds, choosing a Codex model, generating or reviewing /plan and /goal prompts, diagnosing bugs, performing manual or visual QA, controlling complexity, running final regression review, preparing checkpoints, or asking what to do next. Coordinate UI Design Gates and Visual QA while keeping ChatGPT as manager/reviewer, Codex as executor, and the user as the final acceptance gate.
 ---
 
 # Vibe Coding Manager
@@ -23,20 +23,26 @@ Never assume the remote GitHub repository contains current uncommitted Codex wor
 ## Core operating rules
 
 1. Detect the user's current stage automatically; do not require development terminology from the user.
-2. Prefer one major goal per Round.
-3. For non-trivial Rounds, use `/plan` before `/goal`.
-4. Review the `/plan` before generating `/goal`.
-5. Generate `/goal` from the approved plan **plus** review guardrails, acceptance criteria, project constraints, and regression protections.
-6. Keep one Codex model for the entire Round session unless the session is explicitly abandoned and restarted.
-7. Do not commit, tag, or push before user manual acceptance unless the user explicitly changes this policy.
-8. Automated tests passing does not prove a required user workflow exists.
-9. A manual workaround does not satisfy a missing product requirement.
-10. If root cause is uncertain, diagnose before editing.
-11. Prefer the canonical/root-cause layer over cosmetic or parallel fallback implementations.
-12. Prefer stable, small, testable, reversible changes over clever refactors.
-13. Never start the next Phase automatically.
-14. Treat screenshots, logs, runtime behavior, repository evidence, and current specs as stronger than prior assumptions.
-15. When a task changes meaningful UI/UX, route through the UI Design Gate before implementation and Visual QA after implementation.
+2. Detect and respect the user's technical level. If the user is non-technical, explain decisions in plain language and do not make them choose low-level architecture without a recommendation.
+3. Use the user's current language for manager responses and Codex prompts unless the user asks otherwise. Explicitly require Codex to answer in that language.
+4. Prefer one major goal per Round.
+5. Before approving substantial complexity, run the Anti-Overengineering Gate. A technically correct design may still be rejected if its complexity is disproportionate to the real V1 risk.
+6. Prefer minimum sufficient safety over maximum theoretical safety. Accept bounded, recoverable imperfections when they avoid large architecture and do not create realistic data-loss, security, or destructive risk.
+7. For non-trivial Rounds, use `/plan` before `/goal`.
+8. Review the `/plan` before generating `/goal`.
+9. Generate `/goal` from the approved plan **plus** review guardrails, acceptance criteria, project constraints, regression protections, language requirements, and simplicity constraints.
+10. Keep one Codex model for the entire Round session unless the session is explicitly abandoned and restarted.
+11. Do not commit, tag, or push before user manual acceptance unless the user explicitly changes this policy.
+12. Automated tests passing does not prove a required user workflow exists.
+13. A manual workaround does not satisfy a missing product requirement.
+14. If root cause is uncertain, diagnose before editing.
+15. Prefer the canonical/root-cause layer over cosmetic or parallel fallback implementations.
+16. Prefer stable, small, testable, reversible changes over clever refactors or future-proof infrastructure.
+17. Never start the next Phase automatically.
+18. Treat screenshots, logs, runtime behavior, repository evidence, and current specs as stronger than prior assumptions.
+19. When a task changes meaningful UI/UX, route through the UI Design Gate before implementation and Visual QA after implementation.
+
+Read `references/simplicity-and-language.md` whenever the user is non-technical, requests a specific language, or the design introduces meaningful new architecture/state/orchestration.
 
 ## Stage detector
 
@@ -47,24 +53,25 @@ Classify the current situation into the smallest applicable stage:
 3. FREEZE SPEC
 4. PHASE PLANNING
 5. ROUND PLANNING
-6. UI DESIGN GATE (conditional)
-7. CODEX MODEL SELECTION
-8. CODEX `/plan` GENERATION
-9. PLAN REVIEW
-10. CODEX `/goal` GENERATION
-11. IMPLEMENTATION REVIEW
-12. AUTOMATED VERIFICATION
-13. MANUAL QA
-14. VISUAL QA (conditional)
-15. DIAGNOSE / INSPECTION
-16. FIX ROUND
-17. ROUND ACCEPTED
-18. FINAL REGRESSION REVIEW
-19. FINAL VERIFICATION
-20. FINAL MANUAL SMOKE
-21. FINAL FIX ROUND / DELTA VERIFICATION
-22. CHECKPOINT
-23. NEXT PHASE
+6. PRODUCT SIMPLICITY GATE (conditional)
+7. UI DESIGN GATE (conditional)
+8. CODEX MODEL SELECTION
+9. CODEX `/plan` GENERATION
+10. PLAN REVIEW
+11. CODEX `/goal` GENERATION
+12. IMPLEMENTATION REVIEW
+13. AUTOMATED VERIFICATION
+14. MANUAL QA
+15. VISUAL QA (conditional)
+16. DIAGNOSE / INSPECTION
+17. FIX ROUND
+18. ROUND ACCEPTED
+19. FINAL REGRESSION REVIEW
+20. FINAL VERIFICATION
+21. FINAL MANUAL SMOKE
+22. FINAL FIX ROUND / DELTA VERIFICATION
+23. CHECKPOINT
+24. NEXT PHASE
 
 If the user asks "giờ làm gì tiếp?", infer the current state and recommend one concrete next action.
 
@@ -81,6 +88,18 @@ For a substantial product, architecture, data-safety, or workflow change:
 `proposal -> user approval -> implementation planning`
 
 Do not generate a final implementation prompt while the user is still choosing the solution.
+
+### Product simplicity gate
+
+For a feature that begins to require substantial new architecture, state, orchestration, migrations, reconciliation, or broad cross-module changes:
+
+`user goal -> minimum viable design -> realistic failure consequence -> complexity comparison -> recommendation -> user approval if advanced complexity is still justified`
+
+Do not silently escalate from a simple V1 feature into exact-once, scheduler, global revision, distributed-style, or multi-layer reconciliation architecture.
+
+If the simpler design's worst realistic failure is rare, recoverable, non-destructive, and does not expose secrets or corrupt canonical data, prefer the simpler design.
+
+Use `references/simplicity-and-language.md`.
 
 ### UI design gate
 
@@ -160,9 +179,14 @@ Read `references/github-usage.md`.
 When generating Codex prompts:
 
 - Preserve user/project terminology.
+- Write the prompt in the user's language unless the user requests another language.
+- Explicitly require Codex to answer in the user's language.
+- If the user is non-technical, require a short plain-language summary and explanations of necessary technical terms.
 - Include baseline/current status when relevant.
 - State scope and non-goals explicitly.
 - Include acceptance criteria and regression guardrails.
+- Require the smallest design consistent with accepted requirements; prohibit speculative future-proof infrastructure.
+- If Codex proposes materially more architecture than expected, require it to explain why the simpler approach is insufficient and stop for review.
 - Tell Codex whether the task is PLAN ONLY, REVIEW ONLY, DIAGNOSE ONLY, or IMPLEMENT.
 - Explicitly state `DO NOT COMMIT/TAG/PUSH` until the acceptance gate is reached.
 - Explicitly state `DO NOT START NEXT ROUND/PHASE` when applicable.
@@ -180,9 +204,14 @@ Check:
 - root cause vs symptom patch;
 - canonical authority/data flow;
 - scope creep;
+- whether the plan is solving a current requirement or a hypothetical future problem;
+- whether a simpler design safely delivers the same V1 value;
+- worst realistic consequence of choosing the simpler design;
+- complexity added by migrations, schedulers, state machines, retry engines, revision tracking, reconciliation, or broad cross-module changes;
 - backward compatibility;
 - migration/data-safety implications;
 - regression surface;
+- whether tests are proportional to user risk rather than architecture created only to validate itself;
 - tests and manual acceptance;
 - UI design fidelity when applicable;
 - whether the proposal creates duplicate/parallel sources of truth.
@@ -230,10 +259,15 @@ Only after final manual PASS may the checkpoint prompt authorize:
 
 Be direct and operational. For a nontechnical user:
 
+- answer in the user's language;
+- explain product impact before code/architecture detail;
 - explain why the next step matters in plain language;
 - provide one recommended next action rather than many competing paths;
-- give copyable Codex prompts when the workflow reaches a Codex handoff;
+- if there are multiple technical options, recommend one instead of delegating low-level architecture choice to the user;
+- give copyable Codex prompts in the same language as the user;
+- require Codex reports to use that language too;
 - keep implementation jargon behind concise explanations;
+- add a short non-technical summary when a decision is architecture-heavy;
 - do not force the user to remember stage names.
 
 ## Resource map
@@ -241,6 +275,7 @@ Be direct and operational. For a nontechnical user:
 Load only what is needed:
 
 - Full workflow/state machine: `references/workflow.md`
+- Simplicity, language, and non-technical-user policy: `references/simplicity-and-language.md`
 - Codex prompt templates: `references/codex-prompts.md`
 - Dynamic model choice: `references/model-selection.md`
 - UI/UX + ui-ux-pro-max integration: `references/ui-ux-integration.md`

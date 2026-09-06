@@ -20,6 +20,17 @@ Keep project-specific truth here:
 
 Do not copy generic vibe-coding workflow rules into every project if this skill already provides them.
 
+For a non-technical user, it is useful to keep these project-specific preferences explicit so they survive across chats:
+
+```text
+User technical level: non-technical
+Preferred working language: <for example Vietnamese>
+Complexity policy: Stable > Clever; prefer the smallest sufficient V1 solution
+Future-scope policy: do not add cloud/LAN/distributed complexity without a current requirement
+```
+
+These are preferences, not prerequisites. The skill should also infer them from the conversation when they are already clear.
+
 ## Suggested chat organization
 
 ```text

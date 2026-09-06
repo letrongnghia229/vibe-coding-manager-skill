@@ -22,14 +22,21 @@ Check:
 - Does it create a second source of truth or duplicate tree/state/model?
 - Is the scope bounded to the Round?
 - Are non-goals respected?
+- Is the plan solving a current accepted requirement, or a hypothetical future problem?
+- What is the minimum viable design that could satisfy the user goal?
+- What is the worst realistic consequence of using that simpler design?
+- Does the consequence justify added migrations, state machines, schedulers, retry engines, global revision tracking, reconciliation layers, or broad cross-module changes?
 - Are migrations/data changes really necessary?
 - Is backward compatibility addressed?
 - Are atomicity/rollback/idempotency/orphan risks addressed when persistent data changes?
-- Are tests proportional to the change?
+- Are tests proportional to real user risk, rather than primarily validating architecture introduced by the plan itself?
 - Is manual acceptance testable?
+- For a non-technical user: can the recommendation be explained in plain language, and is one option clearly recommended?
 - For UI: does the plan follow the approved Master/UI spec without inventing a new direction?
 
 Verdict: `PASS` or `REVISE`.
+
+A plan may be `REVISE` even when technically correct if its complexity is disproportionate to the V1 consequence being avoided.
 
 ## 2. `/goal` review
 
@@ -40,6 +47,10 @@ Before giving `/goal` to Codex, verify it contains:
 - scope/non-goals;
 - acceptance criteria;
 - regression protections;
+- smallest-sufficient-solution guardrail;
+- prohibition on speculative future-proof infrastructure;
+- the user's language requirement and Codex response-language requirement;
+- plain-language summary requirement for non-technical users;
 - verification commands/expectations;
 - explicit no commit/tag/push before acceptance;
 - stop condition for manual QA.
@@ -58,7 +69,9 @@ Check evidence for:
 - build/smoke status;
 - migrations/schema/data changes;
 - known limitations;
-- unexpected extra scope.
+- unexpected extra scope;
+- complexity that materially exceeds the approved plan;
+- new infrastructure whose value is not tied to an accepted requirement.
 
 Do not equate "Codex says done" with acceptance.
 
