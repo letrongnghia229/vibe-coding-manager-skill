@@ -1,7 +1,7 @@
 interface:
   display_name: Vibe Coding Manager
-  short_description: Orchestrates token-efficient Codex rounds, UI gates, QA, reviews,
-    and checkpoints.
+  short_description: Orchestrates token-efficient Codex rounds, project state, session
+    handoffs, QA, reviews, and checkpoints.
   icon_small: assets/icon.svg
   icon_large: assets/icon.svg
 policy:
