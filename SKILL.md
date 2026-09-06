@@ -44,6 +44,18 @@ Never assume the remote GitHub repository contains current uncommitted Codex wor
 
 Read `references/simplicity-and-language.md` whenever the user is non-technical, requests a specific language, or the design introduces meaningful new architecture/state/orchestration.
 
+## Self-maintenance when updating this skill
+
+When the user asks to update `vibe-coding-manager` itself, treat documentation and guide images as part of the release, not as optional leftovers. Before packaging or GitHub synchronization:
+
+1. Review `SKILL.md` and changed files in `references/`.
+2. Review the repository-facing `docs/usage-guide.md` when that repo is available.
+3. Audit every user-facing guide image against the current workflow and classify it as `KEEP`, `UPDATE`, `REPLACE`, `DELETE`, or `NEW`.
+4. Prefer a small set of clear images for non-technical users; remove duplicate or developer-heavy diagrams from the main guide.
+5. Ensure the guide explains the user's actual maintenance flow: request changes in ChatGPT, store the canonical version in GitHub, and use the local clone mainly for reading/offline reference when that is the user's chosen workflow.
+6. Do not call the update complete while the skill instructions, user guide, images, and packaged `skill.zip` describe different workflows.
+7. After GitHub sync, give the non-technical user the smallest safe local action needed, typically `Pull origin`, and warn about conflicting local uncommitted files before asking them to pull.
+
 ## Stage detector
 
 Classify the current situation into the smallest applicable stage:
