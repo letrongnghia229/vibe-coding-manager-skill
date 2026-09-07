@@ -145,7 +145,7 @@ Escalate to the user when a repository-structure decision materially changes:
 - long-term maintainability or a major irreversible boundary;
 - an already-approved architecture/spec.
 
-Explain those tradeoffs in plain language.
+Explain those tradeoffs in plain language. For complex changes, use the User Understanding Gate and one concrete analogy/example before technical detail.
 
 ## 11. Restructure gate
 
@@ -159,6 +159,8 @@ Before approving a significant restructure, require a short case:
 7. proof that a local refactor cannot solve the problem more safely.
 
 If that case is weak, preserve the current structure.
+
+If the restructure is being introduced only because a small fix has become unexpectedly complex, run the Complexity Escalation Check before approving it.
 
 ## 12. Token-efficiency implications
 

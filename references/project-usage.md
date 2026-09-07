@@ -45,6 +45,8 @@ Keep it short and durable:
 - stable build/test entry points;
 - compact-report/token-efficiency rules.
 
+For non-technical users, also keep a compact reporting rule for blockers/STOP/high-risk findings: explain the practical problem, consequence, confirmed damage vs risk, and required decision before technical evidence.
+
 Do **not** put active Round status, temporary bugs, long PRD text, or current uncommitted implementation summaries into `AGENTS.md`.
 
 Codex should read detailed project docs only when relevant instead of receiving them pasted into every prompt.
@@ -142,6 +144,7 @@ What do I need ChatGPT to do next?
 
 The skill should infer the stage and generate the smallest sufficient next action.
 
+For complex/high-risk Codex output, the user does not need to ask for a translation. The skill should automatically run the User Understanding Gate before another implementation handoff.
 
 ## 8. Current Phase state file
 
@@ -167,8 +170,7 @@ Use `assets/CURRENT_PHASE.template.md` as the starting structure.
 - Codex working in the local repo can read local `docs/CURRENT_PHASE.md` directly.
 - ChatGPT may use it directly only when the file is uploaded, available through an accessible connector/runtime, or otherwise actually readable in the current conversation.
 - A new ChatGPT conversation without local-repo access should receive a Session Handoff. Never claim that ChatGPT read the local file when it did not.
-
-Whenever recommending a fresh ChatGPT or Codex session, include a compact handoff so a non-technical user does not need to remember project state. The handoff should normally be generated from the freshest available local/Codex evidence and should mirror, not replace, `CURRENT_PHASE.md`.
+- Whenever recommending a fresh ChatGPT or Codex session, include a compact handoff so a non-technical user does not need to remember project state. The handoff should normally be generated from the freshest available local/Codex evidence and should mirror, not replace, `CURRENT_PHASE.md`.
 
 Template:
 
@@ -185,6 +187,6 @@ Known pending evidence: <only material unresolved item, if any>
 Next: <exactly one action>
 Do not: <critical safety/next-phase rules>
 Local authority: docs/CURRENT_PHASE.md
-```
+b```
 
 Use `assets/SESSION_HANDOFF.template.md` when a copyable artifact is useful. Do not paste old conversation transcripts or full specs into the handoff.
