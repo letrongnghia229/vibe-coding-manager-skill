@@ -1,129 +1,43 @@
-# Codex Prompt Templates — Ngắn gọn mặc định
+# Codex Prompt Templates — Compact by default
 
-## Mục lục
+## Core rules
 
-1. Nguyên tắc
-2. Normal Round `/plan`
-3. Normal Round `/goal` và correction delta
-4. UI Round additions
-5. Diagnose-only
-6. Manual-smoke discrepancy
-7. Confirmed Fix Round `/plan`
-8. Confirmed Fix Round `/goal`
-9. Independent implementation review
-10. Final Regression Review
-11. Final Verification
-12. Final Delta Verification
-13. Checkpoint
-14. Compact implementation report
-15. Codex Prompt Preflight
+- Default to Vietnamese; preserve exact file/path/command/code/API/identifier/error/model names and precise English technical terms.
+- Start with `AGENTS.md`, `docs/CURRENT_PHASE.md` when present, and the smallest relevant code/docs. Do not enumerate all project docs by default.
+- `/plan` = inspect/plan only. `/goal` = implement approved plan from the same session.
+- After `/plan` PASS, `/goal` references the approved plan instead of repeating it.
+- Do not commit/tag/push before acceptance unless explicitly authorized.
+- Do not start the next Round/Phase automatically.
+- Ask for compact reports, focused verification, and STOP when repository reality conflicts materially with the approved plan.
+- For blocker/STOP/invalidated assumption/architecture/data-safety/recovery/concurrency/security/destructive findings, add the `NON-TECHNICAL USER REPORTING` block below.
 
-## 1. Nguyên tắc
-
-Prompt chỉ mang thông tin Codex **chưa có** từ:
-
-1. repository `AGENTS.md`;
-2. project docs liên quan;
-3. Codex session hiện tại;
-4. approved `/plan` trong session đó.
-
-Không lặp lại project rules ổn định hoặc toàn bộ approved plan nếu context vẫn còn.
-
-Mặc định mọi prompt tạo cho Codex phải viết bằng tiếng Việt. Mỗi prompt phải yêu cầu Codex phản hồi hoàn toàn bằng tiếng Việt. Giữ nguyên tên file, path, command, code, API, identifier, error code, model name và thuật ngữ kỹ thuật tiếng Anh khi dịch sẽ làm giảm độ chính xác.
-
-Để tiết kiệm token, có thể dùng một dòng ngắn cuối prompt khi `AGENTS.md` đã chứa cùng policy:
-
-```text
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
-```
-
-Nếu repo chưa có policy ngôn ngữ tương đương, dùng:
-
-```text
-NGÔN NGỮ: Phản hồi hoàn toàn bằng tiếng Việt. Giải thích ngắn gọn cho người không có nền tảng lập trình; giữ nguyên tên file/path/command/code/API/identifier/error code/model name và thuật ngữ tiếng Anh khi chính xác hơn.
-```
-
-Yêu cầu Codex inspect phạm vi nhỏ nhất liên quan trước và báo cáo ngắn gọn.
-
-High-risk work deepens review and verification; it does not automatically justify reading more documentation. Never enumerate all PRD/roadmap/UI/checkpoint documents by default.
-
-If `docs/CURRENT_PHASE.md` exists, use it as the compact active-state index before expanding into detailed docs.
-
-Chi tiết token/credit policy: `token-efficiency.md`.
-
-## 2. Normal Round `/plan`
+## Normal Round `/plan`
 
 ```text
 /plan
 
 [TÊN ROUND]
 
-Đọc AGENTS.md, docs/CURRENT_PHASE.md nếu có, và chỉ các project docs/files liên quan.
+Đọc AGENTS.md, docs/CURRENT_PHASE.md nếu có, và chỉ code/docs trực tiếp liên quan.
 
 MỤC TIÊU:
-<một mục tiêu ngắn gọn>
+<một mục tiêu ngắn>
 
-GAP / EVIDENCE HIỆN TẠI:
-<chỉ hành vi hiện tại, screenshot/log/diff facts cần thiết>
+GAP / EVIDENCE:
+<chỉ facts hiện tại cần cho Round>
 
 ACCEPTANCE:
 1. ...
 2. ...
 
 PLAN ONLY.
-Trả về: current flow/root cause, thay đổi nhỏ nhất an toàn, files, risks, migration/backward-compatibility impact, tests.
-Không sửa file. Không commit/tag/push. Không bắt đầu Round/Phase tiếp theo.
-Dừng để review.
-
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
+Trả về: current flow/root cause, smallest safe change, files, risks, compatibility/migration impact, tests.
+Nếu phát hiện blocker/STOP/architecture-data-safety conflict hoặc assumption quan trọng sai, dùng NON-TECHNICAL USER REPORTING trước technical evidence.
+Không sửa file. Không commit/tag/push. Không bắt đầu Round/Phase tiếp theo. Dừng để review.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-Chỉ thêm scope/non-goals khi chưa rõ trong `AGENTS.md`/project docs hoặc có nguy cơ scope creep.
-
-## 3. Normal Round `/goal`
-
-Chỉ tạo sau khi `/plan` PASS và ưu tiên dùng **cùng Codex session**.
-
-```text
-/goal
-
-[TÊN ROUND]
-
-Triển khai approved plan từ chính session này.
-
-REVIEW DELTA / GUARDRAIL:
-- <chỉ correction/constraint mới từ plan review; bỏ mục này nếu không có>
-
-VERIFICATION:
-- focused tests cho hành vi vừa đổi;
-- regression tests trực tiếp liên quan;
-- chỉ mở rộng khi risk của Round yêu cầu;
-- git diff --check.
-
-Nếu repository reality mâu thuẫn đáng kể với approved plan, STOP và báo cáo trước khi tự suy đoán.
-Không commit/tag/push. Không bắt đầu Round/Phase tiếp theo.
-
-Báo cáo ngắn: files changed, behavior changed, PASS/FAIL verification, deviation/risk, manual QA.
-Không lặp lại plan. Không paste diff/log dài nếu không cần.
-
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
-```
-
-### Khi `/goal` không còn cùng session với `/plan`
-
-Chỉ cung cấp **approved-plan summary** ngắn, không paste transcript:
-
-```text
-APPROVED PLAN SUMMARY:
-- goal: ...
-- canonical change point: ...
-- critical guardrails: ...
-- acceptance: ...
-```
-
-### Khi plan cần sửa
-
-Ưu tiên correction delta:
+## Plan correction delta
 
 ```text
 /plan
@@ -134,34 +48,39 @@ Giữ nguyên plan trước, ngoại trừ:
 1. <correction>
 2. <correction>
 
-Chỉ trả: contract/flow đã sửa, tests/risks bị ảnh hưởng, và xác nhận các phần còn lại không đổi.
-PLAN ONLY. Không sửa file.
-
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
+Chỉ trả: corrected flow/contract, tests/risks bị ảnh hưởng, và phần còn lại không đổi.
+Nếu correction mở ra architecture/data-safety trade-off mới hoặc assumption cũ sai, dùng NON-TECHNICAL USER REPORTING.
+PLAN ONLY. Không sửa file. Không commit/tag/push.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-Chỉ yêu cầu viết lại toàn bộ plan khi plan cũ sai cấu trúc hoặc session đã mất context đáng tin cậy.
-
-## 4. UI Round additions
-
-Thêm vào `/plan` chỉ khi UI Design Gate áp dụng:
+## Normal Round `/goal`
 
 ```text
-UI SOURCE OF TRUTH:
-Đọc approved Master/page UI spec. Giữ nguyên product semantics và reuse tokens/components hiện có khi phù hợp.
-Không tự tạo visual direction mới.
-Plan phải bao quát layout/scroll/responsive/accessibility/loading/empty/error states mà không kéo theo backend refactor ngoài scope.
+/goal
+
+[TÊN ROUND]
+
+Triển khai approved plan từ chính session này.
+
+REVIEW DELTA / GUARDRAIL:
+- <chỉ correction/constraint mới; bỏ nếu không có>
+
+VERIFICATION:
+- focused tests cho hành vi vừa đổi;
+- directly relevant regression tests;
+- broaden only when Round risk requires;
+- git diff --check.
+
+Nếu repository reality mâu thuẫn đáng kể với approved plan, STOP và báo cáo trước khi tự mở rộng scope.
+Nếu gặp blocker/STOP/invalidated assumption/architecture-data-safety conflict, dùng NON-TECHNICAL USER REPORTING trước technical evidence.
+Không commit/tag/push. Không bắt đầu Round/Phase tiếp theo.
+Báo cáo ngắn: files changed, behavior changed, exact PASS/FAIL, deviation/risk, manual QA.
+Không lặp lại plan hoặc paste diff/log dài.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-Thêm vào `/goal`:
-
-```text
-UI GUARDRAIL:
-Triển khai đúng approved Master/page spec; không redesign và không đổi API/database ngoài approved plan.
-Dừng cho Functional QA + Visual QA.
-```
-
-## 5. Diagnose-only
+## Diagnose only
 
 ```text
 DIAGNOSE ONLY
@@ -170,40 +89,20 @@ VẤN ĐỀ:
 <actual behavior>
 
 EVIDENCE:
-<chỉ screenshot/log/runtime facts liên quan>
+<screenshots/log/runtime facts liên quan>
 
-Inspect runtime/state/logs/database/code/spec khi cần, bắt đầu từ phạm vi hẹp.
-Trả về:
+Inspect phạm vi nhỏ nhất trước. Tách:
 - CONFIRMED
 - LIKELY
 - UNKNOWN
 - next action nhỏ nhất
 
+Nếu phát hiện blocker/STOP/data-safety/recovery/security/concurrency/architecture conflict hoặc assumption quan trọng sai, bắt đầu bằng NON-TECHNICAL USER REPORTING.
 Không sửa code/data. Không commit/tag/push.
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-## 6. Manual-smoke discrepancy
-
-```text
-MANUAL SMOKE INSPECTION — NO EDITS
-
-EXPECTED: <...>
-ACTUAL: <...>
-EVIDENCE: <...>
-
-Trace accepted requirement -> implementation -> user workflow.
-Phân loại chính xác một loại:
-A. INTENTIONAL SCOPE
-B. DOCUMENTED DEFERRED
-C. IMPLEMENTATION GAP
-
-Nếu C, xác định Fix Round nhỏ nhất đúng đắn.
-Không dùng workaround để gọi requirement là PASS.
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
-```
-
-## 7. Confirmed Fix Round `/plan`
+## Confirmed Fix Round `/plan`
 
 ```text
 /plan
@@ -221,11 +120,12 @@ PRESERVE:
 
 PLAN ONLY.
 Trả về: exact fix point, smallest change, files, tests, risks.
-Không sửa file. Không commit/tag/push. Dừng để review.
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
+Nếu fix cần architecture/dependency mới, thay đổi data-safety contract, hoặc complexity tăng nhiều so với gap gốc, dùng NON-TECHNICAL USER REPORTING và STOP để review trước implementation.
+Không sửa file. Không commit/tag/push. Không bắt đầu Phase tiếp theo.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-## 8. Confirmed Fix Round `/goal`
+## Confirmed Fix Round `/goal`
 
 ```text
 /goal
@@ -236,44 +136,35 @@ REVIEW DELTA:
 - <chỉ guardrail mới, nếu có>
 
 Thêm focused regression test khi phù hợp.
-Chạy focused + direct regression tests; chỉ mở rộng nếu fix chạm persistence/recovery/concurrency/security/destructive behavior có risk cao.
-Không commit/tag/push.
-Dừng để user retest acceptance step đã fail.
+Chạy focused + direct regression tests; broaden only if risk requires.
+Nếu approved assumption sai hoặc cần mở rộng architecture đáng kể, STOP và dùng NON-TECHNICAL USER REPORTING.
+Không commit/tag/push. Dừng để user retest acceptance step đã fail.
 Báo cáo ngắn, không lặp lại plan.
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-## 9. Independent implementation review
-
-Chỉ dùng khi risk xứng đáng với reviewer riêng.
+## Independent review
 
 ```text
 INDEPENDENT REVIEW — NO EDITS
 
-[TÊN ROUND]
+[TÊN ROUND / PHASE]
 
-Dùng current local worktree làm authority cho uncommitted work. Đọc AGENTS.md và docs liên quan.
-Review implementation theo accepted Round behavior, tập trung vào:
-- correctness/canonical flow;
-- migration/data safety nếu liên quan;
-- recovery/concurrency/destructive risk nếu liên quan;
-- scope/dead complexity;
-- tests và regressions.
+Dùng current local worktree làm authority cho uncommitted work.
+Review correctness/canonical flow, migration/data safety, persistence/recovery/concurrency/destructive/security risks khi liên quan, scope/dead complexity, tests/regressions.
 
 Trả về:
 VERDICT: PASS hoặc REVISE
 BLOCKERS: <NONE hoặc numbered>
 NON-BLOCKING: <ngắn>
-MANUAL-QA READINESS: YES/NO
 TEST EVIDENCE: <exact commands/results>
 
+Nếu có blocker HIGH/CRITICAL hoặc architecture/data-safety conflict, bắt đầu bằng NON-TECHNICAL USER REPORTING.
 Không block vì style. Không sửa file. Không commit/tag/push.
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-Với high-risk review, chỉ thêm các frozen invariants chưa có trong repo docs/current approved plan.
-
-## 10. Final Regression Review
+## Final Regression Review
 
 ```text
 /plan
@@ -281,25 +172,24 @@ Với high-risk review, chỉ thêm các frozen invariants chưa có trong repo 
 PHASE [N] — FINAL REGRESSION REVIEW
 
 PREVIOUS STABLE CHECKPOINT: <tag/commit>
-CURRENT: tất cả planned Rounds đã accepted; current local worktree chứa uncommitted Phase work.
+CURRENT: all planned Rounds accepted; local worktree contains current uncommitted Phase work.
 
 REVIEW ONLY.
-Review stable checkpoint -> current worktree cho blocker thực: regressions, duplicate authority, migration/data safety, persistence/recovery, concurrency/races, destructive filesystem, security, user-data preservation, missing critical tests, complexity đe dọa stability.
+Review stable checkpoint -> current worktree for real blockers: regressions, duplicate authority, migration/data safety, persistence/recovery, concurrency/races, destructive filesystem/source safety, security, user-data preservation, missing critical tests, complexity threatening stability.
 
-Chỉ trả:
+Trả về:
 A. confirmed-correct areas
 B. blockers
 C. non-blocking observations
 D. exact final verification set
 E. READY FOR FINAL VERIFICATION hoặc MUST FIX BEFORE CHECKPOINT
 
+Nếu có HIGH/CRITICAL blocker, prepend NON-TECHNICAL USER REPORTING: practical issue, worst case, damage confirmed hay only risk, và vì sao checkpoint phải dừng.
 Không sửa file. Không commit/tag/push. Không bắt đầu Phase tiếp theo.
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-## 11. Final Verification
-
-Chỉ dùng sau final review không còn blocker.
+## Final Verification
 
 ```text
 /goal
@@ -307,38 +197,32 @@ Chỉ dùng sau final review không còn blocker.
 PHASE [N] — FINAL VERIFICATION
 
 Chỉ chạy approved final verification set.
-Không thêm feature hoặc refactor code ngoài scope.
-Báo cáo exact PASS/FAIL evidence, git diff --check và working-tree status.
-Không commit/tag/push trừ khi final manual acceptance đã xong và checkpoint được authorize rõ ràng.
+Không thêm feature/refactor ngoài scope.
+Báo cáo exact PASS/FAIL, git diff --check, working-tree status.
+Nếu phát hiện high-risk blocker, prepend NON-TECHNICAL USER REPORTING.
+Không commit/tag/push nếu final manual acceptance chưa PASS.
 Dừng cho final manual smoke.
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-Không lặp full verification sau final manual PASS nếu **không có code thay đổi** kể từ verification này.
-
-## 12. Final Delta Verification
+## Final Delta Verification
 
 ```text
 FINAL DELTA VERIFICATION
 
-Một post-review fix hẹp vừa thay đổi worktree.
-Chỉ verify delta + direct regression surface, trừ khi evidence cho thấy risk rộng hơn.
-
+Verify only the narrow post-review fix + direct regression surface.
 Nếu fix chạm migration/schema, canonical data, persistence/recovery, concurrency/job lifecycle, destructive filesystem, security hoặc broad architecture, STOP và yêu cầu broader final review/verification.
-
+Nếu STOP vì risk rộng hơn, dùng NON-TECHNICAL USER REPORTING.
 Không commit/tag/push.
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-## 13. Checkpoint
+## Checkpoint
 
 ```text
 FINAL MANUAL ACCEPTANCE: PASS
 
 Tạo checkpoint: <TAG>
-
-Nếu code không đổi từ successful final verification gần nhất, không rerun cùng expensive suite chỉ để lặp evidence trừ khi project policy bắt buộc.
-Luôn chạy/xác nhận minimum pre-Git safety checks của project, ít nhất git diff --check/status và build/test gate được yêu cầu rõ ràng.
 
 Nếu required checks PASS:
 - update checkpoint/release docs;
@@ -346,58 +230,71 @@ Nếu required checks PASS:
 - tạo exact tag;
 - push intended branch + tag;
 - verify remote commit/tag;
-- verify clean local worktree.
+- verify clean local working tree.
 
 Nếu có bước FAIL, STOP trước khi tuyên bố checkpoint hoàn tất.
 Không bắt đầu Phase tiếp theo.
-Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md; giữ nguyên thuật ngữ kỹ thuật tiếng Anh khi cần để chính xác.
+Phản hồi hoàn toàn bằng tiếng Việt theo AGENTS.md.
 ```
 
-## 14. Compact implementation report
-
-Dùng khi Codex có xu hướng báo cáo dài:
+## Compact implementation report
 
 ```text
-Báo cáo ngắn gọn bằng tiếng Việt:
-1. file đã đổi;
-2. hành vi đã đổi;
-3. test/build/smoke + PASS/FAIL;
-4. deviation/blocker/known risk;
+Báo cáo ngắn:
+1. files changed;
+2. behavior changed;
+3. exact tests/builds + PASS/FAIL;
+4. deviations/blockers/known risks;
 5. manual QA.
-Không lặp lại plan. Không paste diff/log dài nếu không có lỗi cần xem.
-Giữ nguyên tên file/path/command/code/API/identifier/error code/model name và thuật ngữ kỹ thuật tiếng Anh khi chính xác hơn.
+
+Nếu mục 4 có blocker/STOP/high-risk invalidated assumption, đặt NON-TECHNICAL USER REPORTING trước report kỹ thuật.
+Không lặp plan hoặc paste diff/log dài.
 ```
 
+## NON-TECHNICAL USER REPORTING
 
-## 15. Codex Prompt Preflight
-
-Run this check silently before emitting any Codex `/plan`, `/goal`, diagnose, review, or checkpoint handoff.
+Add this block to high-risk prompts only when relevant:
 
 ```text
-[ ] Does this prompt repeat stable rules already in AGENTS.md?
-[ ] Does it ask Codex to read any document without a concrete reason?
-[ ] Does it enumerate all project docs by default?
-[ ] Can targeted worktree/code inspection answer the question first?
-[ ] Does /goal repeat the approved /plan from the same session?
-[ ] Are scope/non-goals repeated even though repo docs/session already make them clear?
-[ ] Is verification proportionate to risk rather than simply maximal?
+NON-TECHNICAL USER REPORTING
+
+Nếu phát hiện blocker, STOP condition, invalidated assumption, architecture conflict,
+migration/data-safety issue, recovery/concurrency/security/destructive risk:
+
+Bắt đầu report bằng:
+
+## Giải thích cho người không có nền tảng kỹ thuật
+- Vấn đề là gì? 1–2 câu rất đơn giản.
+- Nếu cơ chế phức tạp: cho ít nhất 1 ví dụ/so sánh đời thường dễ hiểu.
+- Hậu quả thực tế xấu nhất là gì?
+- Có dữ liệu/hành vi nào đã thực sự bị ảnh hưởng chưa, hay hiện chỉ là nguy cơ?
+- Tại sao cần STOP/đổi plan/Fix Round?
+- User có decision product/workflow thật sự cần đưa ra không? Nếu không, nói rõ không cần user chọn chi tiết kỹ thuật.
+
+Sau đó mới có:
+
+## Technical evidence
+<evidence chính xác, ngắn>
+```
+
+Rules:
+- Never call potential risk confirmed damage.
+- The simple explanation does not replace technical evidence.
+- Do not force the user to choose low-level implementation details with no product trade-off.
+- If solution complexity grows materially beyond the original bug, state that and STOP for ChatGPT/user review before expanding architecture.
+
+## Codex Prompt Preflight
+
+Before emitting any handoff, silently check:
+
+```text
+[ ] Am I repeating stable rules already in AGENTS.md?
+[ ] Am I asking Codex to read docs without a concrete reason?
+[ ] Does /goal repeat the approved /plan?
+[ ] Can targeted inspection/tests answer this before broad work?
+[ ] Is verification proportionate to risk?
 [ ] Is the requested report compact?
+[ ] For a possible blocker/STOP/high-risk finding, is non-technical reporting requested?
 ```
 
-Hard rule: if there is no concrete reason for a document, remove it from the handoff. High risk should usually increase safety checks, regression coverage, and review rigor rather than documentation breadth.
-
-Anti-pattern:
-
-```text
-BAD
-Read AGENTS.md, PRD, ROADMAP, UI_UX_SPEC, CODEX_RULES, CHECKPOINTS, and the whole repository before planning.
-```
-
-Preferred pattern:
-
-```text
-GOOD
-Read AGENTS.md and docs/CURRENT_PHASE.md if present. Inspect the current worktree and the smallest relevant code/docs first. Expand only when evidence requires it.
-```
-
-For a new session, use the compact session handoff from `workflow.md` / `project-usage.md`; do not paste the previous conversation transcript.
+Keep the prompt to the smallest sufficient NOW/delta/evidence plus required safety/stop rules.

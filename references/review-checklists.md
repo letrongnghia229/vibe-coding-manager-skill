@@ -13,7 +13,7 @@
 9. Delta Verification scope
 10. Checkpoint readiness
 11. Token/efficiency sanity check
-
+12. User Understanding / Complexity Escalation check
 
 ## 1. `/plan` review
 
@@ -29,8 +29,12 @@ Check:
 - Are tests proportional to the change?
 - Is manual acceptance testable?
 - For UI: does the plan follow the approved Master/UI spec without inventing a new direction?
+- Has the proposed solution become materially more complex than the original problem?
+- If yes, has a simpler product/UX/configuration/workflow constraint been reconsidered before approving new architecture?
 
 Verdict: `PASS` or `REVISE`.
+
+If the review contains a complex/high-risk blocker or architecture change, run section 12 before producing the next Codex handoff.
 
 ## 2. `/goal` review
 
@@ -40,7 +44,9 @@ Before giving `/goal` to Codex, verify:
 - verification is proportionate to Round risk;
 - explicit no commit/tag/push before acceptance is present when applicable;
 - stop condition for manual QA is clear;
-- if the plan session was lost, only a compact approved-plan summary is included.
+- if the plan session was lost, only a compact approved-plan summary is included;
+- any required User Understanding Gate has already been satisfied;
+- a high-risk `/goal` asks Codex to use the non-technical reporting block if it encounters a blocker, STOP, or invalidated assumption.
 
 For UI Rounds also include:
 - Master/page spec source of truth;
@@ -56,9 +62,12 @@ Check evidence for:
 - build/smoke status;
 - migrations/schema/data changes;
 - known limitations;
-- unexpected extra scope.
+- unexpected extra scope;
+- blocker/STOP/invalidated-assumption evidence that requires explanation before another implementation attempt.
 
 Do not equate "Codex says done" with acceptance.
+
+If implementation unexpectedly opens a larger architecture problem, do not immediately generate another `/goal`; run section 12 first.
 
 ## 4. Manual QA
 
@@ -71,7 +80,7 @@ Prefer observable user steps:
 
 Track which steps are PASS/FAIL/PENDING so a later Fix Round can resume the smoke test intelligently.
 
-## 5. Visual QA
+## 5. Visual Q@
 
 Review screenshots/renders for:
 - information hierarchy;
@@ -131,6 +140,14 @@ Review previous stable checkpoint -> current working tree for:
 
 Do not block for cosmetic code style.
 
+For every HIGH/CRITICAL blocker, also record:
+- practical user impact;
+- whether damage is confirmed or only possible;
+- why it blocks checkpoint;
+- whether the fix is still small or has escalated into an architecture decision.
+
+Before creating the Fix Round prompt, run section 12 when the blocker is complex/high-risk.
+
 ## 8. Final Verification readiness
 
 Must have:
@@ -177,5 +194,43 @@ Before asking for another Codex call, review, or test cycle, ask:
 - Is the selected model/effort the cheapest safe choice for the actual risk?
 - Can focused tests answer the question before a full suite?
 - Is an independent reviewer actually justified by risk?
+- Is the user being asked to relay another technical prompt before understanding why it is necessary?
 
 Never skip data-safety, migration, recovery, security, or required acceptance checks merely to save tokens.
+
+## 12. User Understanding / Complexity Escalation check
+
+Run this before the next Codex implementation handoff when the current finding is complex/high-risk or the user appears not to understand it.
+
+### Understanding checklist
+
+- [ ] Can I explain the root problem in 1–3 plain Vietnamese sentences?
+- [ ] Did I give at least one concrete everyday analogy/example for a complex mechanism?
+- [ ] Did I state severity in practical terms?
+- [ ] Did I distinguish potential risk from confirmed damage?
+- [ ] Did I explain why the obvious fix is insufficient, if relevant?
+- [ ] Does the user understand why Codex stopped or why the plan must change?
+- [ ] If a meaningful trade-off exists, did I present at most 2–3 options and recommend one?
+- [ ] Did I avoid asking the user to choose low-level implementation details that have no product trade-off?
+- [ ] If a simpler product/workflow rule might solve the root issue, did I give the user a chance to propose it?
+
+### Complexity Escalation checklist
+
+Trigger when the solution path grows materially, for example:
+
+`simple validation -> DB edge case -> process lock -> native dependency/custom subsystem`
+
+Check:
+
+- [ ] What was the original problem in one sentence?
+- [ ] What new complexity has been added?
+- [ ] Is the added complexity necessary to preserve an accepted requirement, or only to preserve an implementation choice?
+- [ ] Could a product/UX/configuration/workflow constraint eliminate the root problem more simply?
+- [ ] Would that simpler constraint still satisfy data safety, compatibility, and user workflow requirements?
+- [ ] If the complex design remains necessary, has the user been told the maintenance/dependency cost in plain language?
+
+### Handoff rule
+
+Only after the required explanation/decision gate is satisfied should ChatGPT generate the next Codex `/plan`, `/goal`, or diagnose prompt.
+
+Use `nontechnical-communication.md` for the full protocol.

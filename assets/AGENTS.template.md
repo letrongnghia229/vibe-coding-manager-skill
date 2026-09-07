@@ -6,6 +6,9 @@
 - Keep precise English technical terms when they are standard or clearer.
 - Do not translate file names, paths, commands, code, APIs, identifiers, error codes, or model names.
 - Do not restate approved plans or paste large diffs/logs unless needed.
+- For a blocker, STOP condition, invalidated assumption, architecture conflict, migration/data-safety issue, recovery/concurrency/security/destructive risk, or failed high-risk implementation, start with `Giải thích cho người không có nền tảng kỹ thuật` before technical evidence.
+- In that summary, state: the practical problem, one simple example/analogy when the mechanism is complex, worst-case consequence, whether any damage is confirmed or only possible, why work must stop/change, and whether the user has a real product/workflow decision to make.
+- Do not ask the user to choose low-level implementation details when there is an obvious engineering default and no meaningful product trade-off.
 
 ## Repository map
 - `<src/backend/etc.>` — <main responsibility>
@@ -33,6 +36,7 @@ The current local working tree may be newer than the stable remote. Do not disca
 - `/plan` inspects only; `/goal` implements the approved plan from the same session.
 - Stop if repository reality materially conflicts with the approved plan.
 - Do not refactor unrelated stable code.
+- If a small fix unexpectedly requires a major new dependency/subsystem/architecture, STOP and report the complexity escalation before implementing it.
 
 ## Git safety
 - Do not commit/tag/push without explicit authorization.
@@ -53,3 +57,5 @@ Report only:
 3. exact verification results;
 4. deviations/blockers/risks;
 5. manual QA steps.
+
+If item 4 contains a blocker/STOP/high-risk invalidated assumption, prepend the plain-language summary required above.

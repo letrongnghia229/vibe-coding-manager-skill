@@ -1,457 +1,218 @@
 # Workflow State Machine
 
-## Table of contents
-
-1. Top-level flow
-2. Brainstorm
-3. Critique
-4. Freeze spec
-5. Phase planning
-6. Round planning
-7. UI Design Gate
-8. Model selection
-9. `/plan`
-10. Plan review
-11. `/goal`
-12. Implementation review
-13. Manual QA
-14. Visual QA
-15. Diagnose / inspection
-16. Fix Round
-17. Round accepted
-18. Final Regression Review
-19. Final Verification
-20. Final Manual Smoke
-21. Final Delta Verification vs full re-review
-22. Checkpoint
-23. Next Phase
-24. Current Phase / Round Ledger
-25. Session Boundary and Handoff
-
-
-## 1. Top-level flow
+## Top-level flow
 
 ```text
-IDEA
- ↓
-BRAINSTORM
- ↓
-CRITIQUE
- ↓
-FREEZE SPEC
- ↓
-PHASE PLANNING
- ↓
-ROUND PLANNING
- ↓
-UPDATE CURRENT PHASE / ROUND LEDGER
- ↓
-UI DESIGN GATE? ── no ──────────────┐
- ↓ yes                               │
-UI DESIGN / CRITIQUE                 │
- ↓                                   │
-USER APPROVAL                        │
- ↓                                   │
-FREEZE UI SPEC                       │
- └───────────────────────────────────┘
- ↓
-MODEL SELECTION
- ↓
-NEW CODEX SESSION
- ↓
-/plan
- ↓
-PLAN REVIEW
- ├─ REVISE → return to /plan
- └─ PASS
-      ↓
-     /goal
-      ↓
- IMPLEMENTATION
-      ↓
- AUTOMATED VERIFICATION
-      ↓
- MANUAL QA
-      ↓
- UI ROUND? → VISUAL QA
-      ↓
- ├─ FAIL → DIAGNOSE/FIX → TEST AGAIN
- └─ PASS → ROUND ACCEPTED
-              ↓
-          MORE ROUNDS?
-          ├─ YES → NEXT ROUND
-          └─ NO
-               ↓
-        FINAL REGRESSION REVIEW
-               ↓
-        FINAL VERIFICATION
-               ↓
-         FINAL MANUAL SMOKE
-               ↓
-        ├─ FAIL → INSPECT → FIX ROUND → RETEST → DELTA/FULL REVIEW
-        └─ PASS
-               ↓
-           CHECKPOINT
-               ↓
-           NEXT PHASE
+IDEA -> BRAINSTORM -> CRITIQUE -> FREEZE SPEC
+  -> PHASE / ROUND PLANNING
+  -> UI DESIGN GATE? (conditional)
+  -> MODEL SELECTION -> NEW CODEX SESSION
+  -> /plan -> ChatGPT review
+       -> complex/high-risk finding? USER UNDERSTANDING GATE
+       -> REVISE: correction delta -> /plan
+       -> PASS: /goal
+  -> implementation -> automated verification -> Codex report
+       -> blocker / STOP / invalid assumption?
+          YES: USER UNDERSTANDING GATE -> diagnose / re-plan / Fix Round
+          NO: manual QA
+  -> UI Round? VISUAL QA
+  -> ROUND_ACCEPTED
+  -> more Rounds? next Round
+  -> all Rounds accepted: independent FINAL REGRESSION REVIEW
+       -> high-risk blocker? USER UNDERSTANDING GATE -> Fix Round
+       -> clean: FINAL VERIFICATION -> FINAL MANUAL SMOKE
+  -> checkpoint -> commit/tag/push/verify -> NEXT PHASE only when user asks
 ```
 
-## 2. Brainstorm
+`USER UNDERSTANDING GATE` and `COMPLEXITY ESCALATION CHECK` are conditional overlays, not extra ceremony for routine work.
 
-Use when the user has an idea, problem, or feature concept that is not yet frozen.
+## Stage rules
 
-Produce:
-- problem statement;
-- target user/workflow;
-- must-have / should-have / nice-to-have / future;
-- risks and unknowns;
-- simplest viable approach;
-- non-goals.
+### Brainstorm / critique / freeze
 
-Do not generate an implementation `/goal` while product direction is still open.
+Before coding:
+- clarify the problem, user workflow, must-haves, non-goals, risks, and simplest viable approach;
+- critique unnecessary complexity and duplicate sources of truth;
+- freeze product/architecture decisions before implementation planning;
+- for a non-technical user, discuss product/workflow meaning before internal implementation detail.
 
-## 3. Critique
+If a proposed solution is much more complex than the original problem, run the Complexity Escalation Check before freezing architecture.
 
-Use a skeptical reviewer mindset. Evaluate:
-- correctness;
-- unnecessary complexity;
-- hidden dependency/risk;
-- maintainability;
-- whether the proposal is suitable for AI-assisted implementation;
-- whether a simpler solution exists.
+### Phase / Round planning
 
-Prefer 1–2 critique rounds, then freeze decisions instead of endlessly reopening scope.
-
-## 4. Freeze spec
-
-Convert approved decisions into explicit source-of-truth requirements:
-- goal;
-- workflow;
-- functional requirements;
-- non-functional requirements;
-- constraints;
-- non-goals;
-- acceptance criteria;
-- known risks;
-- later/deferred items.
-
-For substantial UI work, functional spec may be frozen before the UI Design Gate; the UI spec is frozen after the visual/interaction direction is approved.
-
-## 5. Phase planning
-
-Create vertical slices. Each Phase should deliver a testable capability rather than only infrastructure.
-
-For every Phase define:
-- goal;
-- scope;
-- non-goals;
-- deliverables;
-- automated verification;
-- manual acceptance;
-- intended stable checkpoint.
-
-Avoid building future infrastructure before a current capability needs it.
-
-## 6. Round planning
-
-Split a Phase when it contains multiple coupled risks or unrelated changes.
-
-Good Round properties:
+Prefer vertical, testable slices. One Round should normally have:
 - one major goal;
-- small enough for one Codex session;
-- independently reviewable/testable;
 - explicit non-goals;
-- minimal cross-subsystem churn.
+- one Codex session/model;
+- focused automated verification;
+- observable manual acceptance.
 
-Avoid combining unrelated backend/data/UI refactors into one Round.
+Use `docs/CURRENT_PHASE.md` when present as a short active-state ledger. Do not turn `CHECKPOINTS.md` into a per-Round progress log.
 
-## 7. UI Design Gate
+### UI Design Gate
 
-Trigger for meaningful changes to:
-- new pages/screens;
-- layout or information hierarchy;
-- navigation;
-- major interaction flows;
-- design system;
-- responsive behavior;
-- broad visual modernization.
-
-Skip for tiny isolated changes such as a typo, one icon, or a small spacing correction.
+Trigger for meaningful new pages/layout/navigation/interaction/design-system/responsive work.
 
 Flow:
 
-`functional need -> inspect existing Master -> UI proposal -> critique -> user approval -> freeze UI spec -> Codex Round`
+`functional need -> UI proposal -> critique -> user approval -> freeze UI spec -> Round`
 
-If there is no approved Master, create a design-system direction first. If the app already exists with developer-looking UI, follow the retrofit path in `ui-ux-integration.md`.
+Skip for tiny cosmetic corrections. After implementation, require Visual QA against the approved Master/UI spec.
 
-## 8. Model selection
+### Model selection
 
-Select one model for the full Round before opening the Codex session. See `model-selection.md`.
+Choose the cheapest safe model for the whole Round. See `model-selection.md`. Do not switch mid-session casually; if risk class materially rises, stop and restart the Round session with the appropriate model.
 
-## 9. `/plan`
+### `/plan`
 
-For non-trivial work, `/plan` is the repository-inspection stage. Keep the prompt compact and tell Codex to read `AGENTS.md` plus only the relevant docs/files.
+Use `/plan` for non-trivial work. It is inspect/plan only.
 
-The prompt should request only what matters to the Round:
-- root cause/current flow;
-- exact files/functions/components;
-- migration/backward-compatibility implications when relevant;
-- risk/regression surface;
-- tests;
-- smallest safe implementation plan.
+Prompt Codex to:
+- read `AGENTS.md`, `docs/CURRENT_PHASE.md` if present, and only relevant code/docs;
+- identify root cause/current flow;
+- propose the smallest safe change;
+- list affected files, risks, compatibility/migration implications, tests;
+- stop without editing/commit/tag/push.
 
-Require PLAN ONLY, no edits/commit/tag/push.
+For blocker/STOP/architecture/data-safety findings, require the non-technical reporting block from `codex-prompts.md`.
 
-A direct `/goal` may skip `/plan` only when the task is fully specified, tiny/mechanical, low-risk, contains no unresolved design/root-cause question, and is easy to verify by a narrow diff/test. Documentation-only or obvious copy/rename tasks are typical examples.
+A direct `/goal` is acceptable only for a tiny, fully specified, low-risk, mechanical task with no unresolved design/root-cause question.
 
-## 10. Plan review
+### Plan review
 
-Return:
-- `PASS`, or
-- `REVISE` with precise changes.
+Return `PASS` or `REVISE`.
 
-When a plan needs revision, prefer a correction delta instead of asking Codex to restate the entire plan. Only request a full rewritten plan when the original plan is structurally invalid or the session lost context.
+Check:
+- root cause vs symptom patch;
+- canonical authority/data flow;
+- scope creep;
+- compatibility/migration/data safety;
+- regression surface and tests;
+- duplicate source of truth;
+- whether complexity has escalated materially.
 
-Do not generate `/goal` on a plan that still has unresolved root-cause, scope, or data-safety problems.
+Before another Codex prompt, run the User Understanding Gate when the finding is complex/high-risk or the user would otherwise only copy a technical correction they do not understand.
 
-## 11. `/goal`
+### `/goal`
 
-Generate `/goal` only after plan approval.
+Generate only after plan PASS and any required understanding/product decision gate.
 
-In the same Codex session, do **not** restate the approved plan. Reference it and carry only:
-- review corrections/deltas or critical guardrails added after plan review;
-- proportionate verification expectations;
-- conflict/stop conditions;
-- no-commit/no-next-Round rules when applicable.
+In the same Codex session, reference the approved plan instead of repeating it. Carry only review deltas, critical guardrails, focused verification, STOP rules, and no-commit/no-next-Phase rules.
 
-If the `/plan` session was lost or intentionally restarted, provide a compact approved-plan summary rather than the full transcript.
+### Implementation review
 
-Use the same Codex session/model as `/plan` unless the original session is intentionally abandoned.
+Do not equate “Codex says done” with acceptance. Review changed behavior, tests/builds, scope, risks, and manual QA needs.
 
-## 12. Implementation review
+If Codex reports `STOP`, `BLOCKED`, an invalid assumption, or a new architecture dependency, do not immediately issue another implementation prompt. Explain first, then decide whether to diagnose, re-plan, simplify, or create a Fix Round.
 
-When Codex reports completion:
-- inspect what changed conceptually;
-- check tests/build/smoke evidence;
-- identify manual acceptance steps;
-- do not treat Codex self-report as user acceptance.
+### Manual QA / Visual QA
 
-Use independent implementation review only when risk justifies it (for example migration/persistence/recovery/concurrency/security/destructive behavior or a high-risk cross-module change). Do not require a second reviewer for every small isolated Round.
+Give short observable steps: starting state -> action -> expected result -> persistence/restart/error checks when relevant.
 
-Reuse fresh verification evidence when no code changed; do not request another identical test cycle merely to repeat PASS evidence.
+Track `PASS / FAIL / PENDING`.
 
-## 13. Manual QA
+For UI Rounds, also review hierarchy, spacing, typography, contrast, components, overflow/scroll, responsive states, loading/empty/error states, focus/accessibility, and visual regressions.
 
-Give the user a short, concrete checklist focused on observable behavior. Prefer 3–10 steps for a Round.
+### Diagnose / Fix Round
 
-Track acceptance state:
-- NOT_TESTED
-- IN_PROGRESS
-- BLOCKED
-- FIX_REQUIRED
-- ROUND_ACCEPTED
-- READY_FOR_FINAL_REVIEW
-- READY_FOR_FINAL_VERIFICATION
-- READY_FOR_CHECKPOINT
-- CHECKPOINTED
+If root cause is unknown, diagnose before editing and separate `CONFIRMED / LIKELY / UNKNOWN`.
 
-## 14. Visual QA
+For a confirmed blocker, use a focused Fix Round. Use `/plan` first when uncertainty remains.
 
-For UI Rounds, manual QA is not enough. Also inspect screenshots or rendered states for:
-- hierarchy;
-- alignment;
-- spacing;
-- typography;
-- color/contrast;
-- component consistency;
-- density;
-- overflow/scroll;
-- responsive behavior;
-- empty/loading/error states;
-- keyboard/focus/accessibility where relevant.
+If the Fix Round unexpectedly expands into a new subsystem/native dependency/major architecture, pause and run the Complexity Escalation Check before further implementation.
 
-Compare against the approved Master/UI spec rather than subjective "make it prettier" criteria.
+### Round accepted
 
-## 15. Diagnose / inspection
+A Round is accepted only when required automated verification, manual QA, and Visual QA (if applicable) pass and no blocker remains.
 
-Use when the root cause is unknown or evidence contradicts assumptions.
+Mark `ROUND_ACCEPTED` in the active ledger if used. Do not automatically commit/tag every Round when the project defers checkpoints until Phase end.
 
-Require inspection only before edits. Separate:
-- CONFIRMED
-- LIKELY
-- UNKNOWN
+### Final Regression Review
 
-For manual-smoke discrepancies, classify:
-- INTENTIONAL SCOPE
-- DOCUMENTED DEFERRED
-- IMPLEMENTATION GAP
+After all planned Rounds are accepted, use a fresh independent high-risk review session.
 
-A backend/API workaround may prove a capability exists, but it does not satisfy a missing user-facing requirement if the spec requires UI exposure.
+Review previous stable checkpoint -> current local worktree for:
+- regressions;
+- canonical data/model consistency;
+- migration/persistence/recovery safety;
+- race/concurrency/orphan issues;
+- destructive filesystem/source safety;
+- security where relevant;
+- user-data/manual-edit preservation;
+- missing critical tests;
+- complexity that threatens stability.
 
-## 16. Fix Round
+Verdict: `READY FOR FINAL VERIFICATION` or `MUST FIX BEFORE CHECKPOINT`.
 
-When a blocker is confirmed, prefer a fresh focused Codex session rather than continuing a review-only session.
+For HIGH/CRITICAL blockers, run the User Understanding Gate before the Fix Round handoff.
 
-Select the Fix Round model by current risk using `model-selection.md`; do not default to Extra High.
+### Final Verification / Manual Smoke / checkpoint
 
-Use `/plan` first if the fix has meaningful uncertainty; a fully specified tiny low-risk correction may go directly to `/goal`.
+Run a comprehensive but proportionate final test/build/smoke set, then a short final manual smoke.
 
-## 17. Round accepted
+If a post-review fix changes migration, canonical data, persistence/recovery, concurrency, destructive behavior, security, or broad architecture, rerun broad final review rather than delta-only verification.
 
-A Round is accepted only when:
-- required automated verification passes;
-- user manual acceptance passes;
-- visual QA passes for UI Rounds;
-- no known blocker remains.
-
-After acceptance, update the active Round ledger (`docs/CURRENT_PHASE.md` when present): mark the Round `ROUND_ACCEPTED`, preserve the uncommitted/checkpoint status accurately, and identify exactly one next action. This is progress-state maintenance, not a stable checkpoint.
-
-Do not automatically commit/tag after every Round unless the project explicitly uses per-Round checkpoints.
-
-## 18. Final Regression Review
-
-Trigger after all planned Rounds of a Phase are accepted.
-
-Use a fresh independent Codex session, normally Sol High. Reserve Extra High for unusually high-risk/uncertain Phase diffs.
-
-Review the diff from the previous stable checkpoint to current local working tree.
-
-Look for:
-- regression in previous capabilities;
-- duplicated sources of truth;
-- unsafe migration/reconciliation;
-- state/persistence errors;
-- race/stale-request bugs;
-- destructive filesystem risk;
-- rollback/idempotency/orphan problems;
-- manual-edit preservation regressions;
-- unnecessary complexity that affects correctness/stability;
-- missing test coverage.
-
-Do not refactor for style.
-
-Verdict:
-- `READY FOR FINAL VERIFICATION`, or
-- `MUST FIX BEFORE CHECKPOINT`.
-
-## 19. Final Verification
-
-Run a comprehensive but proportionate verification set:
-- backend/frontend tests as relevant;
-- production build;
-- launcher/smoke tests;
-- high-risk Phase-specific regression tests;
-- `git diff --check`;
-- working-tree inspection.
-
-Do not commit/tag yet if final manual smoke is still pending.
-
-## 20. Final Manual Smoke
-
-Use a short 5–12 step list of the highest-value workflows and high-risk regressions.
-
-If a step fails:
-1. mark checkpoint readiness invalid;
-2. inspect before guessing;
-3. classify the gap;
-4. create a Fix Round if required;
-5. retest the failed step;
-6. resume remaining smoke steps where safe.
-
-## 21. Final Delta Verification vs full re-review
-
-After a post-review fix:
-
-Use **Final Delta Verification** when the fix is narrow and low-risk:
-- few files;
-- no migration;
-- no canonical-data change;
-- no worker/concurrency/security/destructive behavior;
-- direct regression coverage exists.
-
-Rerun broader Final Regression Review when the fix changes:
-- schema/migration;
-- canonical data or reconciliation;
-- persistence/recovery;
-- worker/job lifecycle/concurrency;
-- destructive filesystem behavior;
-- security/auth;
-- broad cross-module architecture.
-
-## 22. Checkpoint
-
-Checkpoint only after final manual PASS.
-
-Checkpoint history and active-state tracking are different: `CHECKPOINTS.md` records stable accepted checkpoints; `docs/CURRENT_PHASE.md` records where ongoing work currently stands. Do not turn checkpoint history into a per-Round progress log.
-
-Expected sequence:
+Checkpoint only after final manual PASS:
 
 `tests -> build -> smoke -> docs -> commit -> tag -> push branch -> push tag -> verify remote -> clean working tree`
 
-After checkpoint completion, update the active state ledger to reflect the stable checkpoint and the next user-approved boundary.
+Never start the next Phase automatically.
 
-If verification fails, stop before declaring checkpoint complete.
+## User Understanding Gate
 
-## 23. Next Phase
+Trigger when:
+- Codex reports a blocker or STOP condition;
+- an approved assumption is disproved;
+- the issue affects data safety, recovery, migration, security, destructive behavior, concurrency, or process lifetime;
+- the solution adds a substantial dependency/native component/new canonical boundary;
+- the user says the explanation is too technical;
+- the next action requires a meaningful user decision.
 
-Only begin after the stable remote checkpoint exists and the user asks to continue.
+Before the next implementation prompt, ChatGPT must cover:
 
+1. **Chuyện gì đang xảy ra?** — 1–3 plain Vietnamese sentences.
+2. **Ví dụ dễ hiểu** — at least one concrete analogy/example for a complex mechanism.
+3. **Mức độ nghiêm trọng** — LOW / MEDIUM / HIGH / CRITICAL plus practical worst case.
+4. **Thiệt hại đã xảy ra chưa?** — confirmed damage / potential risk / unknown.
+5. **Vì sao cách sửa hiển nhiên chưa đủ?** — when relevant.
+6. **Lựa chọn** — at most 2–3 practical options when user input matters.
+7. **Khuyến nghị** — one recommended direction.
+8. **User Idea Window** — when a simpler product/workflow constraint may exist, let the user propose it before architecture is frozen.
 
-## 24. Current Phase / Round Ledger
+Technical detail may follow as a second layer. It must not replace the plain-language layer.
 
-Use a compact project-state ledger when the project spans multiple Rounds or the user may reasonably lose track of progress. Prefer `docs/CURRENT_PHASE.md` when the repository adopts this convention.
+## Complexity Escalation Check
 
-The ledger answers only:
-- current Phase;
-- planned Rounds and their current status;
-- current Round;
-- workflow state (for example `FROZEN`, `READY_FOR_PLAN`, `PLAN_PASS`, `IMPLEMENTED`, `ROUND_ACCEPTED`);
-- selected model for the active Round when known;
-- previous stable checkpoint;
-- whether the current Phase work is still uncommitted/uncheckpointed;
-- exactly one next action.
+Trigger when a small problem starts producing a much larger solution, for example:
 
-Keep detailed requirements in PRD/roadmap/UI/spec docs, not in the ledger. Keep stable historical releases/checkpoints in `CHECKPOINTS.md`, not in the ledger.
+```text
+simple validation -> database edge case -> process lock -> native dependency -> custom subsystem
+```
 
-Update the ledger at meaningful state transitions, especially:
-- Phase/Round structure frozen;
-- current Round frozen;
-- `/plan` ready or PASS;
-- implementation complete;
-- manual acceptance PASS;
-- Round accepted;
-- Phase ready for final review/checkpoint;
-- checkpoint completed.
+Before approving the larger design:
+1. restate the original problem in one plain sentence;
+2. state how solution complexity grew;
+3. revisit whether a product/UX/configuration/workflow constraint can eliminate the root issue while preserving accepted safety requirements;
+4. compare simple vs complex paths on user impact, safety, reversibility, maintenance, and compatibility;
+5. only approve the larger architecture if simpler paths fail accepted requirements.
 
-Do not commit merely to record a Round-state update when the project policy defers commits until the Phase checkpoint.
+This is not permission to weaken data safety.
 
-## 25. Session Boundary and Handoff
+## Anti-pattern
 
-Default ChatGPT ownership: one active Round per conversation. A conversation may include brainstorm, critique, freeze, Codex prompt generation, plan review, implementation review, and manual QA for that Round.
+```text
+Codex technical report
+-> ChatGPT says PASS/REVISE
+-> ChatGPT gives another technical prompt
+-> user copies it back without understanding why
+```
 
-Recommend a fresh ChatGPT conversation when:
-- starting a new Round;
-- starting a new Phase;
-- the current conversation is materially confused or overloaded;
-- a deliberately independent review is needed.
+For a non-technical user, that is workflow failure.
 
-The user may continue in the current conversation; session boundaries are a reliability default, not a blocker.
+Preferred:
 
-Codex remains stricter: one Round = one Codex session = one model, with `/plan` and `/goal` in the same session unless intentionally abandoned.
+```text
+Codex evidence -> ChatGPT verifies -> explains simply -> user can question/propose -> decision freezes -> Codex executes
+```
 
-Whenever recommending a new ChatGPT or Codex session, provide a compact handoff containing only:
-- project and Phase;
-- Round ledger summary;
-- current Round/state;
-- previous stable checkpoint / working-tree checkpoint status;
-- selected model when known;
-- exactly one next action;
-- critical do-not rules (for example no commit/tag/push, no next Phase).
-
-Access rule:
-- `docs/CURRENT_PHASE.md` is the local repository authority for Codex and any ChatGPT execution environment that can actually read that local file.
-- A normal new ChatGPT conversation must not assume it can read the user's local filesystem or claim it has read `docs/CURRENT_PHASE.md` when it has not.
-- When direct local access is unavailable, the Session Handoff is the transport representation of the latest active state for the new ChatGPT conversation.
-- If a fresh handoff conflicts with older GitHub `CURRENT_PHASE.md`, Codex/local evidence wins for uncommitted work. GitHub remains the stable checkpoint authority unless the user explicitly maintains an active-state branch.
-
-Use `assets/SESSION_HANDOFF.template.md` when a formal copyable handoff helps. Do not make the user reconstruct this handoff from earlier messages.
+See `nontechnical-communication.md` for the detailed explanation protocol.
